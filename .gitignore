@@ -1,0 +1,4 @@
+# Rainmeter build artifacts / OS cruft
+Thumbs.db
+desktop.ini
+*.tmp
