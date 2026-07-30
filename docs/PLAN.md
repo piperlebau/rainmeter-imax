@@ -1,229 +1,163 @@
-# IMAX Control Panel — Rainmeter Theme
+# pipOS — Rainmeter theme
 
-A Rainmeter desktop theme that reskins a Windows machine as an **IMAX GT projector
-control panel** — the amber-phosphor touchscreen from the projection booth — while
-functioning as a real, touch-driven system dashboard and app launcher.
+A Rainmeter desktop shell that turns an **ASUS ROG Flow Z13 (2025)** into an
+**IMAX film-projector control console** — amber phosphor on near-black — that also
+works as a real, touch-driven system dashboard and application launcher.
 
-Target machine: **ASUS ROG Flow Z13 (2025)**, run **full-screen** on its
-**2560×1600, 16:10 touchscreen**. *(Resolution to be confirmed.)*
+Built to the **pipOS design system** (see the `pipos-design-system` skill: tokens,
+components, laws, anti-patterns). This document is the project's own plan; the design
+system is the authority on *how things look and are constructed*.
 
 ---
 
-## 1. What is Rainmeter? (quick primer)
+## 1. What Rainmeter is (quick primer)
 
-**Rainmeter** is a free, open-source Windows desktop-customization tool. It draws
-"skins" — small always-on-top panels — directly onto your desktop that can show
-live system data and respond to clicks/taps.
+Rainmeter is a free, open-source Windows tool that draws always-on-top "skins" on the
+desktop showing live system data and responding to clicks/taps.
 
-Key concepts we'll use:
-
-| Term | What it is |
+| Term | Meaning here |
 |---|---|
-| **Skin** | A single panel, defined by one `.ini` text file. Ours is `IMAX.ini`. |
-| **Config** | The folder holding a skin and its assets (our `IMAX/` folder). |
-| **Measure** | A data source — CPU %, free RAM, uptime, clock, network bytes, etc. Measures *get* values. |
-| **Meter** | A visible element — text, rectangle, image, button. Meters *draw* things, often fed by a measure. |
-| **Plugin** | Add-on for data Rainmeter can't read natively. We need one (**HWiNFO**) only for GPU load & temperatures. |
-| **`@Resources`** | Per-config asset folder for fonts, images, and include files. Fonts dropped in `@Resources/Fonts` load automatically. |
-| **Include (`.inc`)** | A text file of variables pulled into the skin. This is how we make the theme configurable without editing skin code. |
-| **`.rmskin`** | A one-click installer package. We'll produce one at the end so install is drag-and-drop. |
+| **Skin** | One panel, defined by a `.ini` file. |
+| **Measure** | A data source (CPU %, RAM, uptime, clock, net bytes…). |
+| **Meter** | A drawn element (text, rectangle, image, button), usually fed by a measure. |
+| **Plugin** | Add-on for data Rainmeter can't read natively (**UsageMonitor**, **HWiNFO**). |
+| **`@Resources`** | Per-config assets: fonts, images, include files. |
+| **Include (`.inc`)** | A variables file pulled into the skin — how the theme stays configurable without touching skin code. |
+| **`.rmskin`** | One-click installer package (produced at the end). |
 
-**Important constraints:**
-- Rainmeter is **Windows-only**. It's authored here on Linux, so **you test on the
-  Z13** and send screenshots; the dev loop is *edit → you refresh → feedback → fix*.
-- Skins are drawn in fixed pixels. To fill the Z13 edge-to-edge regardless of
-  Windows' display-scaling setting (the Z13 usually ships at 200%), the whole layout
-  is driven by one **`Scale`** variable we tune once during setup.
-- **Touch** registers as normal mouse clicks, so logic is unchanged — it only means
-  buttons must be **large and well-spaced** for fingers.
-
----
-
-## 2. The vision
-
-Reproduce the look of the reference photo — pure black background, warm amber vector
-text and rounded-rectangle boxes, blocky terminal font, checkbox status indicators,
-`** REMOTE MODE **` banner — but wire every field to real data and make the buttons
-launch real programs. It should read as the IMAX panel at a glance and work as a
-control surface up close.
-
-**Aesthetic details:**
-- **Font:** VT323 (bundled) — a blocky retro-terminal font matching the panel.
-- **Phosphor glow:** a soft bloom around text/lines.
-- **CRT scanlines:** a faint horizontal-line overlay (toggleable).
-- **Palette:** amber by default, with green and ice/cyan alternates.
+**Constraints that shape everything:**
+- Rainmeter is **Windows-only**. Authored here on Linux, so **you test on the Z13**;
+  the loop is *edit → you refresh → screenshot → fix*.
+- **Geometry is 1280×800 logical** = 2560×1600 at Windows' 200% scale. Designing at
+  1280×800 fills the Z13 edge-to-edge.
+- **Touch = mouse clicks.** Logic is unchanged; buttons must be large (primary ≥44px).
+- Rainmeter has **no loops, arrays, blur, or blend modes** — glow/scanlines are baked
+  into PNG alpha; repeated elements are written out explicitly.
 
 ---
 
-## 3. Decisions locked so far
+## 2. Identity (from the design system)
 
-| Decision | Choice |
-|---|---|
-| Purpose | **Functional** system monitor (real data behind IMAX-styled fields) |
-| Coverage | **Full-screen** dashboard on the Z13 |
-| Metrics tracked | CPU, RAM, Disk, Network, Uptime, Clock/Date, **GPU + temps** (GPU/temps via HWiNFO) |
-| Buttons | Launch **real, non-destructive** tools |
-| Workspaces | 4 pages: **Gaming · Software Dev · Productivity · Media/Creative** |
-| Mode switch | **Change Mode** cycles the workspace pages |
-| Phosphor color | **Independent toggle** (amber/green/ice), *not* tied to the mode |
-| Launch slots | Configurable **per workspace** (count *and* grid layout can differ) |
+A 1990s IMAX projector console, modernised for a tablet. Amber phosphor on near-black,
+monospace all-caps labels, hairline **caption-break boxes**, **inverse-video** status
+fields, a green LED rail on the bezel. **Nothing animates.** The machine is
+*instrumented, not decorated* — it shows model names, `.exe` paths, sensor indices.
 
----
+**Font:** IBM Plex Mono (bundled — Regular / Medium / SemiBold).
 
-## 4. Architecture: anchor panels vs. the variable panel
-
-The single most important design idea:
-
-> **Most of the panel is a fixed "anchor" that never changes between workspaces.
-> Only the PROGRAMS launch region changes.**
-
-### Anchor panels (identical in every workspace)
-These are the IMAX chrome and the performance monitors. They stay put no matter which
-mode you're in:
-
-- **Header** — `IMAX®` logo + `SYSTEM LOCAL — <MODE> MODE` title
-- **SYSTEM INFO** box — hostname / OS / user *(the old `SHOW INFORMATION` / TRAILER / TITLE box)*
-- **STATUS** band — `ONLINE / NOMINAL`, reflecting live CPU state
-- **Uptime / Date / Time** line *(the old `SHOW TIME` line)*
-- **Performance stack (right column):**
-  - `LAMP VALUES` → **CPU % + MEM %**
-  - `THERMAL` → **GPU °C + CPU °C** (HWiNFO)
-  - `FRAME COUNT` → **network received** counter (odometer feel)
-  - **Indicator checkboxes** → live: network link, disk healthy, RAM healthy, power, spare
-  - `RESET FRAME COUNT` → reset the network counter
-- **`** REMOTE MODE **` banner**
-- **Bottom control bar** — Change Mode, workspace tabs, Phosphor/Scan toggles, Exit
-
-### The variable panel (per-workspace)
-Only the **PROGRAMS** launch region changes between workspaces. Each workspace defines:
-- its **title** (shown in the header),
-- how many buttons it has (**count**),
-- how they're arranged (**columns** → auto-flow grid),
-- and each button's **label + command**.
-
-So Gaming might be 6 buttons in a 3×2 grid, while Dev is 4 large buttons in a 2×2 —
-the anchors around them are pixel-for-pixel the same.
+### The laws (each exists because breaking it caused a real defect)
+1. No animation. 2. Severity is colour **and** text. 3. Show the mechanism.
+4. Mark unofficial mechanisms with `△`. 5. Never fake a value (missing = `—`, never `0`).
+6. Swapped panes are byte-identical in size. 7. Fixed regions clip, never grow.
+8. Every colour/dimension comes from a token. 9. Touch tiers: primary ≥44px,
+   secondary ≥26px, dense rows 16px; tap on release; no hover-only UI.
 
 ---
 
-## 5. How configuration works (easy to edit)
+## 3. Two variants, one back-end
 
-Everything user-tunable lives in plain-text `.inc` files under `IMAX/@Resources/`.
-**You never edit the skin code to change your apps.**
+| | **Pixel (IMAX)** | **TUI (console)** |
+|---|---|---|
+| Look | hairline shapes, free pixel layout | box-drawing glyphs on a 132×40 char grid |
+| Matches | the reference photo | a text-terminal reading of the same console |
 
-```
-IMAX/
-├─ IMAX.ini                     ← the skin (you don't touch this)
-└─ @Resources/
-   ├─ Settings.inc              ← active workspace, active color, scanlines on/off
-   ├─ Fonts/VT323-Regular.ttf   ← bundled terminal font
-   ├─ Images/Scanlines.png      ← CRT overlay
-   ├─ Themes/
-   │   ├─ Theme-Amber.inc       ← color palettes
-   │   ├─ Theme-Green.inc
-   │   └─ Theme-Ice.inc
-   └─ Workspaces/
-       ├─ Gaming.inc            ← YOUR apps + labels per mode
-       ├─ Dev.inc
-       ├─ Productivity.inc
-       └─ Media.inc
-```
-
-A workspace file looks like this — add/remove `Btn` lines to change the count, change
-`WS_Cols` to change the layout:
-
-```ini
-[Variables]
-WS_Title=GAMING
-WS_Cols=3            ; grid columns
-WS_Count=6           ; how many buttons are active
-
-Btn1_Label=STEAM
-Btn1_Cmd="C:\Program Files (x86)\Steam\steam.exe"
-
-Btn2_Label=ARMOURY CRATE
-Btn2_Cmd="C:\...\ArmouryCrate.exe"
-
-; ...up to a fixed maximum (e.g. 12) of slots
-
-NextWorkspace=Dev    ; wiring for the Change Mode cycle
-PrevWorkspace=Media
-```
-
-**Why this is robust:** every workspace file uses the *same* variable names
-(`Btn1_Label`, `WS_Cols`, …). The skin has a fixed set of button meters that read
-those names and lay themselves out. **Change Mode** just rewrites the active workspace
-in `Settings.inc` and refreshes — the same button meters repaint from the new file.
-No loops, no fragile tricks.
+Shared **measures** live in `@Resources/logic/` and feed **both**; **meters** are
+per-variant. Changing a sensor index or adding a workspace = edit one `logic/` file,
+both variants pick it up. **Pixel is the primary target**; TUI is a stretch variant.
 
 ---
 
-## 6. Field mapping (IMAX element → real function)
+## 4. All themes included
 
+Not just amber — the full set of design-system palettes ships, each a token file in
+`@Resources/themes/`. The **PHOSPHOR** control cycles them (rewrites `@IncludeTheme`,
+refreshes); the choice persists across restarts.
+
+| Theme | Character | WCAG* |
+|---|---|---|
+| **AMBER HYBRID** *(default)* | IMAX phosphor; severity colours only where state matters | 6.6 AA |
+| **HC AMBER** | Same identity, max legibility; safest at 200% DPI | 6.3 AA |
+| **MONO WHITE** | No hue; highest contrast; severity via shape/text too | 11.5 AAA |
+| **TOKYO NIGHT** | Modern console; strongest token separation | 7.3 AAA |
+| **NIGHT RED** | Preserves dark adaptation | 6.1 |
+
+\*Worst case across information-bearing roles only. More palettes from the system
+(HC GREEN/CYAN/BLACK, CATPPUCCIN, GRUVBOX, NORD…) can be added as token files once
+their 14-role mappings are confirmed.
+
+---
+
+## 5. Anchor panels vs. the variable panel
+
+- **Anchors (identical every workspace):** header + modeline, `SYSNODE` info,
+  `STATUS` inverse-video strip, uptime line, and the right-column instruments —
+  `LAMP VALUES` (CPU/MEM), `THERMAL` (GPU/CPU °C), `POWER`, `FRAME COUNT` (net RX),
+  `INDICATORS`, the bottom **tab rail** + LED row.
+- **Variable panel:** the **LAUNCH BAY** only. Each workspace sets its own button
+  count and grid; the anchors around it never move (swapped panes stay identical
+  height — law 6).
+
+### Field mapping (IMAX → function)
 | Panel element | Becomes |
 |---|---|
-| `IMAX®` + `SHOW LOCAL – AUTO MODE` | Logo kept · title → `SYSTEM LOCAL – <MODE> MODE` |
-| `SHOW INFORMATION` (TRAILER/TITLE) | `SYSTEM INFO` — hostname, OS, user |
-| `STATUS: AUTO MODE / PRESETS COMPLETED` | Live status band (`ONLINE / NOMINAL`) |
-| `SHOW TIME · DATE · TIME` | Uptime · live date · live clock |
-| 5 checkboxes (Spare…SYSTEM READY) | Live indicators: net link, disk, RAM, power, spare |
-| `LAMP VALUES 41.0V 154A` | **CPU % + MEM %** |
-| `THERMAL` *(new)* | **GPU °C + CPU °C** (HWiNFO) |
-| `FRAME COUNT 255315` | **Network received** counter |
-| `RESET FRAME COUNT` | Reset the network counter |
-| `RUN / JOG / STOP` + grid | **Per-workspace program launchers** (the variable panel) |
-| `Functions / Alarms` | Phosphor color toggle · Scanline toggle *(placement TBD)* |
-| `Change Mode / MANUAL` | Cycle workspace pages (Gaming→Dev→Prod→Media) |
-| `AUTO LOAD` | Open Startup folder |
-| `Change Show` | Refresh skin |
-| `Exit Show` | Unload skin |
+| `SHOW LOCAL – AUTO MODE` | `SYSTEM LOCAL – <MODE> MODE` modeline |
+| `SHOW INFORMATION` | `SYSNODE` — host/model/os/user/profile (key=value) |
+| `STATUS / PRESETS COMPLETED` | Inverse-video status strip (fill = severity) |
+| `SHOW TIME · DATE · TIME` | uptime / date / clock |
+| checkboxes | live `INDICATORS` (net/disk/ram, ON/OFF) |
+| `LAMP VALUES` | CPU % + MEM %, segmented threshold bars |
+| *(new)* `THERMAL` / `POWER` | GPU/CPU °C, battery draw — via HWiNFO, marked `△` |
+| `FRAME COUNT` | network received counter |
+| `RUN / JOG / STOP` + grid | the per-workspace `LAUNCH BAY` |
+| `Change Mode` | cycle workspaces · `PHOSPHOR` | cycle themes · `Exit Show` | unload |
 
 ---
 
-## 7. Default app sets (edit freely)
+## 6. Configuration (no skin edits)
 
-Starting placeholders — swap in your real paths in the workspace files.
+```
+pipOS/
+├─ pipOS.ini                     ← Pixel skin (generated; you don't edit)
+└─ @Resources/
+   ├─ Variables.inc              ← active workspace + @IncludeTheme + sensor indices (persisted)
+   ├─ fonts/IBMPlexMono-*.ttf
+   ├─ images/                    ← baked scanline / glow PNGs
+   ├─ logic/                     ← shared MEASURES only (CPU, RAM, thermal, net, status priority)
+   ├─ themes/*.inc               ← the palettes (done)
+   └─ Workspaces/*.inc           ← YOUR apps per mode (label + command); count & columns per file
+```
 
-| # | Gaming | Software Dev | Productivity | Media / Creative |
-|---|---|---|---|---|
-| 1 | Steam | VS Code | Outlook | Spotify |
-| 2 | Armoury Crate | Windows Terminal | Word | Netflix (browser) |
-| 3 | Discord | GitHub Desktop | Excel | OBS Studio |
-| 4 | Xbox / Game Bar | Docker Desktop | PowerPoint | Photoshop |
-| 5 | OBS Studio | Chrome/Edge | Teams | Premiere / Clipchamp |
-| 6 | Spotify | Postman | OneNote | VLC |
-| 7 | — | Notion/Obsidian | Calendar | DaVinci Resolve |
-| 8 | — | File Explorer | Slack | YouTube (browser) |
+Each workspace file uses the **same variable names** (`Btn1_Label`, `WS_Cols`, …), so
+Change Mode just swaps which file loads and refreshes.
 
----
-
-## 8. Roadmap & status
-
-- **Phase 0 — Scope** ✅ *done* — goals & decisions locked (this doc).
-- **Phase 1 — Look** 🔄 *in progress* — static PNG mockups of the layout, amber +
-  green shown, full-screen version rendered. Refining proportions back toward the
-  original photo, with the anchor/variable split.
-- **Phase 2 — Data** ⬜ — wire live measures (CPU, RAM, disk, net, uptime, clock;
-  GPU/temps via HWiNFO with graceful `N/A` fallback).
-- **Phase 3 — Interactivity** ⬜ — workspace state machine (Change Mode + tabs),
-  configurable launch grid, phosphor + scanline toggles, all button actions.
-- **Phase 4 — Package & polish** ⬜ — `.rmskin` installer, README, `Scale` tuning
-  guide for the Z13, glow/CRT tuning.
-
-**Done so far:** repo scaffolded; VT323 font bundled; three phosphor palettes;
-scanline overlay generated; amber/green and full-screen layout mockups in `docs/`.
+**Data sources:** UsageMonitor for CPU/RAM/disk/net (no dependency); HWiNFO (VSB
+method) only for temps/power/GPU, indices stored as named vars and read with their
+labels to catch drift (`△`); a background writer for anything needing a shell call.
 
 ---
 
-## 9. Open questions to refine
+## 7. Roadmap & status
 
-1. **Resolution** — confirm the Z13 panel is 2560×1600.
-2. **Layout fidelity** — how close to the original photo's proportions vs. the
-   roomier full-screen arrangement? (The anchor/variable split works either way.)
-3. **Toggle placement** — do Phosphor/Scan live on the `Functions`/`Alarms` buttons
-   (keeps original labels but changes their meaning), or as separate small controls?
-4. **Max launch slots** — cap the per-workspace button count at 12? 16?
-5. **App lists** — start from the defaults above and you edit, or hand me your exact
-   apps + paths to bake in?
-6. **GPU/temps** — OK to depend on HWiNFO (free) for those two readouts, with `N/A`
-   shown if it isn't running?
+- **Phase 0 — Scope & identity** ✅ locked; realigned to the pipOS design system.
+- **Phase 1 — Look** ✅ Pixel mockup at 1280×800 (DEV workspace), live theme switcher
+  across all 5 palettes. → `docs/pixel-mockup.html`.
+- **Phase 2 — Data (measures)** ⬜ `logic/` measures via UsageMonitor + HWiNFO, with
+  `—`/`△` fallbacks and a status priority integer.
+- **Phase 3 — Pixel meters** ⬜ translate the mockup to Rainmeter meters; caption-break
+  boxes, segmented bars, inverse-video, tab rail; wire launch bay + toggles.
+- **Phase 4 — Package & polish** ⬜ `.rmskin`, README, `Scale`/DPI guide, glow/scanline
+  bake, TUI variant if wanted.
+
+**Done:** repo reset to pipOS structure; IBM Plex Mono bundled; 5 theme includes;
+Pixel mockup + all-themes artifact.
+
+---
+
+## 8. Open questions
+
+1. Confirm Z13 panel is **2560×1600**.
+2. **Variants:** Pixel only for now, or build the TUI console variant too?
+3. **Workspaces:** keep Gaming / Dev / Productivity / Media, and hand me your real
+   app paths, or start from defaults you edit?
+4. **Toggle placement:** PHOSPHOR/SCAN/CHANGE MODE on the rail (as mocked) — good?
+5. **HWiNFO:** OK as the dependency for temps/power/GPU (with `—` when absent)?

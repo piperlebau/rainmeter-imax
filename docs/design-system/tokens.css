@@ -1,0 +1,176 @@
+/* ============================================================
+   pipOS design tokens — drop-in CSS custom properties.
+   Default theme is AMBER HYBRID. Swap :root for another block,
+   or add a class to <html> and use the alternates below.
+   ============================================================ */
+
+:root {
+  /* --- structure --- */
+  --bg:        #0A0700;
+  --bezel:     #100E0A;
+  --fg:        #FFB000;
+  --dim:       #7F5800;
+  --faint:     #4A3300;
+  --frame:     #8A5F00;
+
+  /* --- semantic --- */
+  --key:       #CC8C00;
+  --str:       #FFC94D;
+  --num:       #FFE08A;
+  --path:      #D9A441;
+  --kw:        #FFD27A;
+
+  /* --- severity --- */
+  --ok:        #3BFF6A;
+  --warn:      #FF9E2B;
+  --err:       #FF5E2B;
+
+  --sel:       #2A1D00;
+  --ink:       #0D0900;   /* text on an inverse-video fill */
+  --glow:      rgba(255,176,0,.30);
+
+  /* --- type --- */
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", "Consolas", monospace;
+  --fs-brand: 23px; --fs-mode: 19px; --fs-readout: 17px;
+  --fs-body: 13px;  --fs-label: 10px; --fs-sub: 8px;
+
+  /* --- TUI grid (separate coordinate system) --- */
+  --cell-w: 9.45px;
+  --cell-h: 18.6px;
+  --tui-fs: 15.8px;
+}
+
+/* HC AMBER — same identity, maximum legibility (WCAG 6.3) */
+.theme-hc-amber {
+  --bg:#000; --bezel:#0B0800; --fg:#FFC53D; --dim:#9A6E00; --faint:#5A4000; --frame:#B58200;
+  --key:#FFA500; --str:#FFDD77; --num:#FFF0B3; --path:#FFB733; --kw:#FFE680;
+  --ok:#3BFF6A; --warn:#FF9500; --err:#FF4A3D; --sel:#2A1D00; --ink:#000;
+  --glow:rgba(255,197,61,.28);
+}
+
+/* MONO WHITE — no hue, highest contrast (WCAG 11.5).
+   Severity must also change shape or text here. */
+.theme-mono-white {
+  --bg:#000; --bezel:#080808; --fg:#FFF; --dim:#909090; --faint:#4A4A4A; --frame:#B0B0B0;
+  --key:#E0E0E0; --str:#FFF; --num:#F0F0F0; --path:#D0D0D0; --kw:#FFF;
+  --ok:#FFF; --warn:#C0C0C0; --err:#FFF; --sel:#222; --ink:#000;
+  --glow:rgba(255,255,255,.22);
+}
+
+/* TOKYO NIGHT — modern console, strongest token separation (WCAG 7.3) */
+.theme-tokyo-night {
+  --bg:#0C0E12; --bezel:#15181E; --fg:#C8CDD4; --dim:#5A6270; --faint:#333944; --frame:#3E4A5C;
+  --key:#7AA2F7; --str:#9ECE6A; --num:#FF9E64; --path:#7DCFFF; --kw:#BB9AF7;
+  --ok:#9ECE6A; --warn:#E0AF68; --err:#F7768E; --sel:#2A3149; --ink:#0C0E12;
+  --glow:rgba(122,162,247,.22);
+}
+
+/* NIGHT RED — preserves dark adaptation (WCAG 6.1) */
+.theme-night-red {
+  --bg:#000; --bezel:#0A0000; --fg:#FF4136; --dim:#A32820; --faint:#5C1712; --frame:#D94438;
+  --key:#FF7A70; --str:#FF9A92; --num:#FFC2BD; --path:#FF6A5E; --kw:#FFB3AD;
+  --ok:#FF4136; --warn:#FF8C42; --err:#FFF; --sel:#2A0805; --ink:#000;
+  --glow:rgba(255,65,54,.26);
+}
+
+/* ============================================================
+   Base components
+   ============================================================ */
+
+.pip-screen {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--mono);
+  position: relative;
+  overflow: hidden;
+}
+
+/* scanlines — reduce or omit on light schemes */
+.pip-screen::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 20;
+  background: repeating-linear-gradient(to bottom,
+    rgba(0,0,0,0) 0, rgba(0,0,0,0) 2px, rgba(0,0,0,.28) 3px, rgba(0,0,0,.28) 4px);
+  mix-blend-mode: multiply;
+}
+
+/* caption-break box — the signature frame */
+.pip-box { border: 1px solid var(--frame); position: relative; }
+.pip-box > .cap {
+  position: absolute; top: -7px; left: 12px; padding: 0 6px;
+  background: var(--bg); color: var(--kw);
+  font-size: var(--fs-label); letter-spacing: .14em; font-weight: 600;
+}
+
+/* inverse-video field — fill colour carries the meaning */
+.pip-inv      { background: var(--key);  color: var(--ink); font-weight: 600; }
+.pip-inv-ok   { background: var(--ok);   color: var(--ink); font-weight: 700; }
+.pip-inv-warn { background: var(--warn); color: var(--ink); font-weight: 700; }
+.pip-inv-err  { background: var(--err);  color: var(--ink); font-weight: 700; }
+
+/* segmented bar — discrete cells, never a gradient */
+.pip-bar { display: grid; grid-auto-flow: column; gap: 2px; height: 11px; }
+.pip-bar i { background: var(--faint); display: block; }
+.pip-bar i.on   { background: var(--ok);   box-shadow: 0 0 4px var(--glow); }
+.pip-bar i.warn { background: var(--warn); box-shadow: 0 0 4px var(--glow); }
+.pip-bar i.hot  { background: var(--err);  box-shadow: 0 0 4px var(--glow); }
+
+/* checkbox toggle */
+.pip-toggle { display: grid; grid-template-columns: 16px 1fr auto; gap: 9px;
+  align-items: center; background: none; border: 0; cursor: pointer;
+  font-family: var(--mono); font-size: 12px; color: var(--dim); text-align: left; }
+.pip-toggle .sq { width: 13px; height: 13px; border: 1px solid var(--frame); position: relative; }
+.pip-toggle[aria-pressed="true"] { color: var(--fg); }
+.pip-toggle[aria-pressed="true"] .sq { border-color: var(--ok); }
+.pip-toggle[aria-pressed="true"] .sq::after {
+  content: ""; position: absolute; inset: 2px; background: var(--ok); }
+
+/* LED */
+.pip-led { width: 11px; height: 11px; border-radius: 50%; background: var(--faint); }
+.pip-led.on { background: var(--ok); box-shadow: 0 0 7px 2px var(--ok); }
+
+/* chip — secondary action, >=26px */
+.pip-chip { border: 1px solid var(--faint); background: none; color: var(--key);
+  font-family: var(--mono); font-size: 9px; letter-spacing: .08em;
+  padding: 5px 8px; min-height: 26px; cursor: pointer; }
+.pip-chip.primary { color: var(--ok); border-color: var(--frame); }
+.pip-chip[aria-pressed="true"] { background: var(--ok); color: var(--ink); font-weight: 700; }
+
+/* primary control — >=44px */
+.pip-btn { border: 1px solid var(--frame); background: none; color: var(--fg);
+  font-family: var(--mono); min-height: 44px; cursor: pointer;
+  text-shadow: 0 0 6px var(--glow); letter-spacing: .08em; }
+.pip-btn[aria-pressed="true"] { background: var(--fg); color: var(--ink); text-shadow: none; }
+
+/* semantic text roles */
+.t-key { color: var(--key); }
+.t-str { color: var(--str); }
+.t-num { color: var(--num); }
+.t-path{ color: var(--path); }
+.t-kw  { color: var(--kw); font-weight: 600; }
+.t-ok  { color: var(--ok); }
+.t-warn{ color: var(--warn); }
+.t-err { color: var(--err); }
+.t-dim { color: var(--dim); }
+.t-faint { color: var(--faint); }
+
+/* fragility mark for unofficial mechanisms */
+.pip-fragile::after { content: " △"; color: var(--warn); font-size: .85em; }
+
+/* absent value — never render 0 for a missing sensor */
+.pip-absent { color: var(--dim); }
+.pip-absent::before { content: "—"; }
+
+/* ============================================================
+   TUI grid: fixed cells. A fallback-font glyph must never be
+   able to widen a row — this is the whole trick.
+   ============================================================ */
+.pip-grid { font-family: var(--mono); font-size: var(--tui-fs);
+  line-height: var(--cell-h); user-select: none; }
+.pip-grid .row  { display: flex; height: var(--cell-h); }
+.pip-grid .cell { width: var(--cell-w); min-width: var(--cell-w); max-width: var(--cell-w);
+  display: inline-block; text-align: center; white-space: pre; }
+
+/* No animation anywhere. Do not add transitions to state changes. */
+@media (prefers-reduced-motion: no-preference) {
+  .pip-btn, .pip-chip { transition: background .08s linear, color .08s linear; }
+}

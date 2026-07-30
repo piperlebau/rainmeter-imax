@@ -1,4 +1,5 @@
-# Rainmeter build artifacts / OS cruft
-Thumbs.db
-desktop.ini
-*.tmp
+docs/theme-amber-hybrid.png
+docs/theme-hc-amber.png
+docs/theme-mono-white.png
+docs/theme-tokyo-night.png
+docs/theme-night-red.png
