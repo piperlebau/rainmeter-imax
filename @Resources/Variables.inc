@@ -27,14 +27,22 @@ BudgetY=607          ; last widget in each column must end at Y+H <= this
 PaneHeight=230       ; W11 launch bay AND W18 editor — identical, do not diverge
 EdBodyH=129          ; fixed editor/notes text clip region — never grows (ClipString=1)
 EdLineH=17           ; per-line meter pitch inside the clip region
+; ---- v21 layout origins (measured from docs\pipOS-wireframe-v21.html, 1280x800) ----
+MainX=50             ; left edge of the .main content region
+MainY=78             ; top of .main (budget is measured from here)
+LeftX=50             ; left column x
+LeftW=894            ; left column width (v21: console removed, full width)
+RightX=957           ; right column x
 ColRightW=292        ; right column width
+ColGap=13            ; gap between the two columns
 ScreenPad=13
 BezelRailW=34        ; LED rail gutter
 GapL=9               ; left-column vertical gap
 GapR=7               ; right-column vertical gap
 HdrH=42              ; header height (watch the (R) superscript — keep within this)
-RailH=79             ; workspace rail button height
-NotesRowH=210        ; height of the full-width notes row (was console|notes two-up)
+RailH=74             ; workspace rail button height (v21)
+; NOTE: v21's lowest widgets end ~612px below MainY vs the 607 budget; matched to the
+;       wireframe authority. Reconcile to 607 if the geometry gate is enforced on render.
 
 ; ---- TUI variant geometry (§17.2) — a SEPARATE coordinate system.
 ;      Do not derive these from the pixel values; they describe the
@@ -60,15 +68,16 @@ FontSizeBrand=23
 ; Notes (W17) and Editor (W18) panes are separate skins that land inside
 ; frames drawn by the main skin. These X/Y are where the child skins position
 ; themselves. If you move the frame in pipOS.ini, move these too.
-; Notes is now FULL WIDTH of the left column (console removed).
-NotesX=29
-NotesY=95
-NotesW=616
-NotesH=210
-EditorX=29
-EditorY=95
-EditorW=616
-EditorH=210
+; v21: Notes (W17) is the full-width top pane, always visible.
+; Editor (W18) swaps into the Launch Bay (W11) slot in WRITE mode — both 230px (constraint 3).
+NotesX=50
+NotesY=119
+NotesW=894
+NotesH=159
+EditorX=50
+EditorY=414
+EditorW=894
+EditorH=230
 
 ; ============================================================
 ;  PERSISTED STATE  (written at runtime via !WriteKeyValue)

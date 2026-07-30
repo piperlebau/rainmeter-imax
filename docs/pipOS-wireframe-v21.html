@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pipOS — Layout Wireframe v21</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --amber-bright:#FFB000;
+  --amber-mid:#CC8C00;
+  --amber-dim:#7F5800;
+  --amber-faint:#4A3300;
+  --glow:rgba(255,176,0,.30);
+  --screen:#0A0700;
+  --bezel:#100E0A;
+  --led:#3BFF6A;
+  --led-off:#0E2A14;
+  --warn:#FF5E2B;
+  --mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono","Consolas",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#050403;font-family:var(--mono);display:grid;place-items:center;overflow:auto;padding:24px 12px}
+#stage{width:1280px;height:800px;transform-origin:top center;position:relative;flex:none}
+
+.bezel{
+  position:absolute;inset:0;background:var(--bezel);border-radius:10px;
+  display:grid;grid-template-columns:34px 1fr;padding:13px 15px 13px 0;
+  box-shadow:inset 0 0 0 1px #1d1a13;
+}
+.ledrail{display:flex;flex-direction:column;justify-content:center;gap:16px;align-items:center}
+.led{width:11px;height:11px;border-radius:2px;background:var(--led-off);box-shadow:inset 0 0 0 1px #06180c;transition:background .12s linear,box-shadow .12s linear}
+.led[data-on="1"]{background:var(--led);box-shadow:0 0 7px 2px rgba(59,255,106,.55),0 0 18px 5px rgba(59,255,106,.20)}
+.ledlabel{font-size:8px;letter-spacing:.06em;color:#2e4a35;writing-mode:vertical-rl;transform:rotate(180deg);margin-top:10px}
+
+.screen{
+  position:relative;background:var(--screen);border-radius:4px;padding:13px 16px;
+  display:grid;grid-template-rows:auto 1fr auto;gap:10px;overflow:hidden;
+}
+.screen::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0px,rgba(0,0,0,0) 2px,rgba(0,0,0,.28) 3px,rgba(0,0,0,.28) 4px);
+  mix-blend-mode:multiply;
+}
+.screen::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 55%,rgba(0,0,0,.55) 100%);
+}
+
+/* primitives */
+.box{border:1px solid var(--amber-mid);border-radius:3px;position:relative}
+.box>.cap{position:absolute;top:-7px;left:12px;background:var(--screen);padding:0 6px;font-size:10px;letter-spacing:.14em;color:var(--amber-mid);white-space:nowrap}
+.btn{
+  border:1px solid var(--amber-mid);border-radius:3px;background:transparent;color:var(--amber-bright);
+  font-family:var(--mono);font-size:13px;letter-spacing:.10em;padding:8px 10px;cursor:pointer;
+  text-shadow:0 0 6px var(--glow);transition:background .09s linear,color .09s linear;min-height:44px;text-align:center;
+}
+.btn:hover{background:rgba(255,176,0,.09)}
+.btn:active{background:var(--amber-mid);color:#0d0900;text-shadow:none}
+.btn[aria-pressed="true"]{background:var(--amber-mid);color:#0d0900;text-shadow:none;font-weight:600}
+.btn:focus-visible{outline:2px solid var(--amber-bright);outline-offset:2px}
+.chip{
+  border:1px solid var(--amber-faint);border-radius:2px;background:transparent;color:var(--amber-mid);
+  font-family:var(--mono);font-size:9px;letter-spacing:.10em;padding:5px 9px;cursor:pointer;min-height:26px;
+}
+.chip:hover{background:rgba(255,176,0,.08);color:var(--amber-bright)}
+.chip:focus-visible{outline:2px solid var(--amber-bright);outline-offset:2px}
+.chip.strong{border-color:var(--amber-mid);color:var(--amber-bright)}
+.chip[aria-pressed="true"]{background:var(--amber-mid);border-color:var(--amber-mid);color:#0d0900;font-weight:700}
+
+/* W1 */
+.hdr{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:end;height:42px}
+.brand{font-size:23px;font-weight:700;letter-spacing:.02em;color:var(--amber-bright);line-height:1.2}
+.brand sup{font-size:8px;vertical-align:top;font-weight:400;position:relative;top:1px}
+.modeline{
+  font-size:19px;font-weight:600;letter-spacing:.07em;color:var(--amber-bright);
+  border-bottom:1px solid var(--amber-mid);padding-bottom:3px;white-space:nowrap;
+  text-shadow:0 0 7px var(--glow);
+}
+.hdrbtn{min-height:29px;padding:5px 16px;font-size:11px;letter-spacing:.10em}
+
+.main{display:grid;grid-template-columns:1fr 292px;gap:13px;min-height:0}
+.left{display:grid;grid-auto-rows:min-content;gap:9px;min-height:0;align-content:end}
+.right{display:grid;grid-auto-rows:min-content;gap:7px;min-height:0;align-content:end}
+
+/* two-up: now a single full-width notes row */
+.twoup{display:grid;grid-template-columns:1fr;gap:11px}
+.cursor{display:inline-block;width:7px;height:13px;background:var(--amber-bright);box-shadow:0 0 6px var(--glow)}
+
+/* W17 — notes */
+.notes{padding:15px 12px 10px;display:grid;gap:5px;align-content:start}
+.notehead{display:flex;justify-content:space-between;font-size:9px;letter-spacing:.10em;color:var(--amber-dim)}
+.notehead .file{color:var(--amber-bright)}
+.noteout{display:grid;gap:2px;font-size:11px;line-height:1.32;color:var(--amber-bright);text-shadow:0 0 5px var(--glow)}
+.noteout .ln{display:grid;grid-template-columns:16px 1fr;gap:7px}
+.noteout .ln span:first-child{color:var(--amber-faint);font-size:9px;text-shadow:none;text-align:right}
+.noteout .ln span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.notecursor{display:flex;gap:7px;align-items:center;margin-top:1px;padding-left:23px}
+.notetools{display:flex;gap:6px;margin-top:3px;flex-wrap:wrap}
+
+/* W2 */
+.sysinfo{padding:8px 14px 7px}
+.sysinfo dl{display:grid;grid-template-columns:104px 1fr;gap:3px 10px;font-size:13px}
+.sysinfo dt{color:var(--amber-dim);letter-spacing:.10em}
+.sysinfo dd{color:var(--amber-bright);letter-spacing:.04em}
+
+/* W3 / W4 */
+.strip{padding:5px 12px;font-size:12px;letter-spacing:.08em;display:flex;gap:26px;flex-wrap:wrap;border-radius:3px}
+.strip.inv{background:var(--amber-mid);color:#0d0900;font-weight:600}
+.strip.dim{border:1px solid var(--amber-faint);color:var(--amber-mid)}
+
+/* W11 */
+.launcher{padding:16px 12px 12px;height:230px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.slot{
+  display:grid;align-content:center;gap:4px;padding:9px 14px;height:96px;
+  border:1px solid var(--amber-mid);border-radius:3px;background:transparent;color:var(--amber-bright);
+  font-family:var(--mono);cursor:pointer;text-align:left;text-shadow:0 0 6px var(--glow);overflow:hidden;
+}
+.slot .idx{font-size:9px;color:var(--amber-dim);letter-spacing:.18em}
+.slot .nm{font-size:16px;letter-spacing:.07em;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot .tg{font-size:9px;color:var(--amber-dim);letter-spacing:.10em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot:hover{background:rgba(255,176,0,.09)}
+.slot:active{background:var(--amber-mid);color:#0d0900;text-shadow:none}
+.slot:active .idx,.slot:active .tg{color:#4a3300}
+.slot:focus-visible{outline:2px solid var(--amber-bright);outline-offset:2px}
+.slot.empty{border-style:dashed;border-color:var(--amber-faint);color:var(--amber-faint);cursor:default;text-shadow:none}
+.slot.empty:hover{background:transparent}
+.slot.empty .nm{font-size:12px;letter-spacing:.14em}
+
+/* W18 — full editor */
+.editor{
+  padding:16px 13px 11px;display:grid;gap:6px;height:230px;
+  grid-template-rows:auto 1fr auto auto;overflow:hidden;
+}
+.edhead{display:flex;justify-content:space-between;font-size:9px;letter-spacing:.10em;color:var(--amber-dim)}
+.edhead .file{color:var(--amber-bright)}
+.edbody{
+  display:grid;gap:1px;font-size:12px;line-height:1.2;color:var(--amber-bright);
+  text-shadow:0 0 5px var(--glow);overflow:hidden;align-content:start;
+}
+.edbody .ln{display:grid;grid-template-columns:22px 1fr;gap:9px;align-items:start}
+.edbody .ln span:first-child{color:var(--amber-faint);font-size:9px;text-shadow:none;text-align:right}
+.edbody .ln span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.edbody.wrap .ln span:last-child{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:break-word}
+.edcursorrow{display:grid;grid-template-columns:22px 1fr;gap:9px;align-items:center}
+.edcursorrow span:first-child{color:var(--amber-faint);font-size:9px;text-align:right}
+.edfoot{display:flex;justify-content:space-between;align-items:center;margin-top:4px;gap:8px;flex-wrap:wrap}
+.edtools{display:flex;gap:6px;flex-wrap:wrap}
+.edstat{font-size:9px;color:var(--amber-dim);letter-spacing:.10em}
+
+/* W6 */
+.banner{
+  border:1px solid var(--amber-mid);border-radius:3px;text-align:center;padding:5px;
+  font-size:22px;font-weight:700;letter-spacing:.16em;color:var(--amber-bright);
+  text-shadow:0 0 9px var(--glow),0 0 20px rgba(255,176,0,.15);
+}
+.banner .ast{display:inline-block;margin:0 15px;font-size:16px;vertical-align:middle}
+
+/* W8 — TIGHT checkbox toggles, early-version styling */
+.toggles{padding:11px 12px 9px;display:grid;gap:5px}
+.tog{
+  display:grid;grid-template-columns:12px 1fr auto;gap:9px;align-items:center;
+  background:transparent;border:none;cursor:pointer;padding:0;
+  font-family:var(--mono);font-size:11px;letter-spacing:.07em;
+  color:var(--amber-mid);text-align:left;min-height:16px;
+}
+.tog:hover{color:var(--amber-bright)}
+.tog:focus-visible{outline:2px solid var(--amber-bright);outline-offset:2px}
+.tog .chk{width:12px;height:12px;border:1px solid var(--amber-mid);border-radius:1px}
+.tog[aria-pressed="true"]{color:var(--amber-bright)}
+.tog[aria-pressed="true"] .chk{background:var(--amber-bright);box-shadow:0 0 6px var(--glow)}
+.tog .frag{font-size:9px;color:var(--warn);letter-spacing:.08em;line-height:1}
+
+/* W13 */
+.loads{padding:13px 12px 10px;display:grid;gap:5px}
+.bar{display:grid;grid-template-columns:42px 1fr 36px;gap:8px;align-items:center;font-size:10px;letter-spacing:.06em}
+.bar .bname{color:var(--amber-dim)}
+.bar .bval{color:var(--amber-bright);text-align:right;font-variant-numeric:tabular-nums}
+.seg{display:grid;grid-template-columns:repeat(16,1fr);gap:2px;height:11px}
+.seg i{background:var(--amber-faint);border-radius:1px;display:block}
+.seg i.on{background:var(--amber-bright);box-shadow:0 0 5px var(--glow)}
+.seg i.hot{background:var(--warn);box-shadow:0 0 5px rgba(255,94,43,.5)}
+
+/* readouts */
+.readout{display:grid;grid-template-rows:auto 1fr}
+.rlabel{background:var(--amber-mid);color:#0d0900;font-size:10px;letter-spacing:.14em;text-align:center;padding:4px;font-weight:600;position:relative}
+.rlabel .rst{
+  position:absolute;right:4px;top:2px;font-size:8px;letter-spacing:.10em;
+  border:1px solid #0d0900;border-radius:1px;background:transparent;color:#0d0900;
+  padding:1px 5px;cursor:pointer;font-family:var(--mono);font-weight:700;
+}
+.rlabel .rst:hover{background:rgba(0,0,0,.18)}
+.readout .rval{border:1px solid var(--amber-mid);border-top:none;color:var(--amber-bright);text-align:center;padding:6px;display:grid;place-items:center}
+.rval .sub{font-size:8px;color:var(--amber-dim);letter-spacing:.10em;margin-top:2px}
+.mid{font-size:17px;font-weight:500;line-height:1.1}
+.quad{display:grid;grid-template-columns:1fr 1fr;width:100%}
+.quad>div{display:grid;place-items:center;padding:3px 0}
+.quad>div:nth-child(even){border-left:1px solid var(--amber-faint)}
+.quad>div:nth-child(3),.quad>div:nth-child(4){border-top:1px solid var(--amber-faint)}
+.tri{display:grid;grid-template-columns:repeat(3,1fr);width:100%}
+.tri>div{display:grid;place-items:center;padding:2px 0}
+.tri>div+div{border-left:1px solid var(--amber-faint)}
+
+/* W16 */
+.perf{display:grid;grid-template-rows:auto auto}
+.perfbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--amber-mid);border-top:none}
+.perfbtns .btn{min-height:38px;font-size:10px;letter-spacing:.04em;padding:3px 2px;border:none;border-radius:0;display:grid;align-content:center;gap:0}
+.perfbtns .btn+.btn{border-left:1px solid var(--amber-faint)}
+.perfbtns .btn .w{display:block;font-size:8px;color:var(--amber-dim);letter-spacing:.06em}
+.perfbtns .btn[aria-pressed="true"] .w{color:#4a3300}
+
+/* W5 */
+.transport{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.transport .btn{min-height:76px;font-size:15px;letter-spacing:.10em;font-weight:600;display:grid;align-content:center;gap:4px;padding:5px 2px}
+.transport .btn .fn{display:block;font-size:8px;letter-spacing:.08em;color:var(--amber-dim);font-weight:400}
+.transport .btn[aria-pressed="true"] .fn{color:#4a3300}
+
+/* W12a */
+.wsrail{display:grid;grid-template-columns:repeat(5,1fr);gap:11px}
+.wsrail .btn{min-height:74px;display:grid;align-content:center;gap:3px;padding:6px 6px}
+.wsrail .btn .num{font-size:11px;letter-spacing:.20em;color:var(--amber-dim)}
+.wsrail .btn .code{font-size:19px;letter-spacing:.14em;font-weight:700}
+.wsrail .btn .cnt{font-size:9px;letter-spacing:.12em;color:var(--amber-dim)}
+.wsrail .btn[aria-pressed="true"] .num,
+.wsrail .btn[aria-pressed="true"] .cnt{color:#4a3300}
+
+/* annotations */
+.anno{position:absolute;z-index:20;background:#3BFF6A;color:#04160a;font-size:9px;font-weight:700;letter-spacing:.08em;padding:1px 4px;border-radius:2px;pointer-events:none;display:none}
+body[data-anno="1"] .anno{display:block}
+.toolbar{width:1280px;display:flex;gap:10px;align-items:center;margin-bottom:12px;flex:none}
+.toolbar h1{font-size:12px;letter-spacing:.16em;color:var(--amber-dim);font-weight:400;flex:1}
+.tbtn{border:1px solid var(--amber-dim);background:transparent;color:var(--amber-mid);font-family:var(--mono);font-size:10px;letter-spacing:.10em;padding:6px 12px;border-radius:2px;cursor:pointer}
+.tbtn[aria-pressed="true"]{background:var(--amber-mid);color:#0d0900}
+.tbtn:focus-visible{outline:2px solid var(--amber-bright);outline-offset:2px}
+</style>
+</head>
+<body data-anno="0">
+
+<div class="toolbar" id="toolbar">
+  <h1>pipOS / LAYOUT WIREFRAME v21 — console removed, notes full-width</h1>
+  <button class="tbtn" id="annoBtn" aria-pressed="false">ANNOTATE WIDGETS</button>
+</div>
+
+<div id="stage">
+<div class="bezel">
+
+  <div class="ledrail" id="ledrail">
+    <span class="anno" style="left:2px;top:6px">W12b</span>
+    <div class="led" data-on="1"></div><div class="led" data-on="0"></div>
+    <div class="led" data-on="0"></div><div class="led" data-on="0"></div>
+    <div class="led" data-on="0"></div>
+    <span class="ledlabel">WORKSPACE</span>
+  </div>
+
+  <div class="screen">
+
+    <div class="hdr">
+      <span class="anno" style="left:-4px;top:-11px">W1</span>
+      <div class="brand">pipOS<sup>®</sup></div>
+      <div class="modeline" id="modeline">SHELL LOCAL — AUTO MODE</div>
+      <button class="btn hdrbtn" title="AUTO LOAD · ROTATE · RELOAD · LOCK">FUNCTIONS</button>
+      <button class="btn hdrbtn">ALERTS</button>
+    </div>
+
+    <div class="main">
+
+      <div class="left">
+
+        <div class="twoup">
+
+          <!-- W17 : notes — now full width -->
+          <div class="box notes">
+            <span class="cap">NOTES</span>
+            <span class="anno" style="right:4px;top:-11px">W17</span>
+            <div class="notehead">
+              <span>FILE: <span class="file" id="noteFile">ws1-dev.md</span></span>
+              <span id="noteDirty">● UNSAVED</span>
+            </div>
+            <div class="noteout" id="noteBody"></div>
+            <div class="notecursor"><span class="cursor"></span></div>
+            <div class="notetools">
+              <button class="chip">NEW</button>
+              <button class="chip">OPEN…</button>
+              <button class="chip strong">SAVE</button>
+              <button class="chip">SAVE AS…</button>
+              <button class="chip">INSERT DATE</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="box sysinfo">
+          <span class="cap">SESSION INFORMATION</span>
+          <span class="anno" style="right:4px;top:-11px">W2</span>
+          <dl>
+            <dt>HOST:</dt><dd>FLOW-Z13 · GZ302EA</dd>
+            <dt>PROFILE:</dt><dd id="wsTitle">DEV / ODYSSEY</dd>
+          </dl>
+        </div>
+
+        <div class="strip inv">
+          <span class="anno" style="right:4px;top:-11px">W3</span>
+          <span>STATUS: AUTO MODE</span>
+          <span>ALL PRESETS NOMINAL</span>
+        </div>
+
+        <div class="strip dim">
+          <span class="anno" style="right:4px;top:-11px">W4</span>
+          <span>UPTIME <span id="uptime">0004:12</span> (HH:MM)</span>
+          <span>DATE <span id="date">07/26/26</span></span>
+          <span>TIME <span id="time">22:28:45</span></span>
+        </div>
+
+        <div class="box launcher" id="bayBox">
+          <span class="cap">LAUNCH BAY</span>
+          <span class="anno" style="right:4px;top:-11px">W11</span>
+          <div class="grid" id="grid"></div>
+        </div>
+
+        <div class="box editor" id="editorBox" style="display:none">
+          <span class="cap">EDITOR</span>
+          <span class="anno" style="right:4px;top:-11px">W18</span>
+          <div class="edhead">
+            <span>FILE: <span class="file" id="edFile">chapter-04.md</span></span>
+            <span id="edDirty">● UNSAVED</span>
+          </div>
+          <div class="edbody" id="edBody"></div>
+          <div class="edcursorrow"><span id="edCurLine">9</span><span class="cursor"></span></div>
+          <div class="edfoot">
+            <div class="edtools">
+              <button class="chip">NEW</button>
+              <button class="chip">OPEN…</button>
+              <button class="chip strong">SAVE</button>
+              <button class="chip">SAVE AS…</button>
+              <button class="chip" id="wrapBtn" aria-pressed="false">WRAP</button>
+            </div>
+            <span class="edstat" id="edStat">LN 9 · COL 1 · 412 WORDS</span>
+          </div>
+        </div>
+
+        <div class="banner">
+          <span class="anno" style="right:4px;top:-11px">W6</span>
+          <span class="ast">✳</span><span id="bannerText">WORKSPACE — DEV</span><span class="ast">✳</span>
+        </div>
+
+      </div>
+
+      <div class="right">
+
+        <div class="box toggles" id="toggleBox">
+          <span class="cap">TOGGLES</span>
+          <span class="anno" style="right:4px;top:-11px">W8</span>
+        </div>
+
+        <div class="box loads" id="loads">
+          <span class="cap">SUBSYSTEM LOAD</span>
+          <span class="anno" style="right:4px;top:-11px">W13</span>
+        </div>
+
+        <div class="readout">
+          <span class="anno" style="right:4px;top:-11px">W9/10</span>
+          <div class="rlabel">THERMAL / POWER</div>
+          <div class="rval">
+            <div class="quad">
+              <div><div class="mid">61°C</div><div class="sub">CPU TCTL</div></div>
+              <div><div class="mid">54°C</div><div class="sub">IGPU</div></div>
+              <div><div class="mid">41.0 W</div><div class="sub">PACKAGE</div></div>
+              <div><div class="mid">−18.2 W</div><div class="sub">BATTERY</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="readout">
+          <span class="anno" style="right:4px;top:-11px">W14</span>
+          <div class="rlabel">BATTERY / ENERGY
+            <button class="rst" id="resetBtn">RST</button>
+          </div>
+          <div class="rval">
+            <div class="tri">
+              <div><div class="mid" id="btime">3:42</div><div class="sub">LEFT</div></div>
+              <div><div class="mid" id="bpct">68%</div><div class="sub">CHARGE</div></div>
+              <div><div class="mid" id="wh">14.6</div><div class="sub">Wh USED</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="perf">
+          <span class="anno" style="right:4px;top:-11px">W16</span>
+          <div class="rlabel">PERFORMANCE MODE</div>
+          <div class="perfbtns" id="perfbtns"></div>
+        </div>
+
+        <div class="transport" id="transport">
+          <span class="anno" style="left:-4px;top:-11px">W5</span>
+          <button class="btn" id="btnRun">RUN<span class="fn">PLAY / PAUSE</span></button>
+          <button class="btn" id="btnJog">JOG<span class="fn">NEXT</span></button>
+          <button class="btn" id="btnStop">STOP<span class="fn">HALT</span></button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="wsrail" id="wsrail">
+      <span class="anno" style="left:-4px;top:-11px">W12a</span>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+const WORKSPACES=[
+ {id:1,code:"DEV",title:"DEV / ODYSSEY",mode:"apps",note:"ws1-dev.md",dirty:true,
+  lines:["## sprint notes","- fix DPI scaling on rotate","- HWiNFO idx drift → verify","- ship v0.3 tag"],
+  apps:[{n:"VS CODE",t:"Code.exe"},{n:"TERMINAL",t:"wt.exe"},{n:"GITHUB DESKTOP",t:"GitHubDesktop.exe"},
+        {n:"DOCKER",t:"Docker Desktop.exe"},{n:"POSTMAN",t:"Postman.exe"},{n:"FIREFOX DEV",t:"firefox.exe -P dev"}]},
+ {id:2,code:"MEDIA",title:"MEDIA / PLAYBACK",mode:"apps",note:"ws2-media.md",dirty:false,
+  lines:["watchlist","- Odyssey (IMAX 70mm)","- Dune 3 trailer cut","- re-encode 4k batch"],
+  apps:[{n:"VLC",t:"vlc.exe"},{n:"SPOTIFY",t:"Spotify.exe"},{n:"PLEX",t:"Plex.exe"},
+        {n:"OBS STUDIO",t:"obs64.exe"},{n:"AUDACITY",t:"audacity.exe"}]},
+ {id:3,code:"GAME",title:"GAME / ARCADE",mode:"apps",note:"ws3-game.md",dirty:false,
+  lines:["backlog","- finish Silksong","- test 8060S @ 45W cap","- controller remap"],
+  apps:[{n:"STEAM",t:"steam.exe"},{n:"XBOX",t:"shell:AppsFolder"},{n:"RETROARCH",t:"retroarch.exe"},
+        {n:"DISCORD",t:"Discord.exe"},{n:"G-HELPER",t:"GHelper.exe"},{n:"MOONLIGHT",t:"Moonlight.exe"}]},
+ {id:4,code:"WRITE",title:"WRITE / MANUSCRIPT",mode:"editor",note:"ws4-write.md",dirty:false,
+  lines:["outline","- act II pivot","- cut the dream seq","- 2k words today"],
+  edFile:"chapter-04.md",
+  edLines:["# Chapter 04 — The Projection Booth",
+           "",
+           "The console woke in amber before he did, every field already filled with numbers he had not asked for. Frame count. Lamp hours. The reel unit reporting ready to no one in particular.",
+           "",
+           "He put a hand flat on the glass; it was warm.",
+           "ref: C:\\Users\\pip\\Documents\\manuscripts\\odyssey\\draft-notes-2026-07.md"],
+  apps:[]},
+ {id:5,code:"DIAG",title:"DIAG / TELEMETRY",mode:"apps",note:"ws5-diag.md",dirty:false,
+  lines:["sensor map","- Tctl = idx 10","- GPU Core Load = idx 44","- EC conflict: kill AC"],
+  apps:[{n:"HWINFO64",t:"HWiNFO64.exe"},{n:"TASK MANAGER",t:"taskmgr.exe"},{n:"CRYSTALDISK",t:"DiskInfo64.exe"},
+        {n:"EVENT VIEWER",t:"eventvwr.msc"},{n:"RESMON",t:"resmon.exe"},{n:"POWERSHELL",t:"pwsh.exe"}]}
+];
+const TOGGLES=[
+  {name:"WI-FI",         on:true,  frag:false},
+  {name:"BLUETOOTH",     on:false, frag:false},
+  {name:"MUTE",          on:false, frag:false},
+  {name:"NIGHT LIGHT",   on:true,  frag:true},
+  {name:"ROTATION LOCK", on:false, frag:true}
+];
+const PERF=[{code:"SILENT",watts:"15 W"},{code:"BALANCED",watts:"45 W"},{code:"TURBO",watts:"80 W"}];
+const BARS=[{name:"CPU",val:34},{name:"IGPU",val:12},{name:"RAM",val:47},{name:"VRAM",val:22},{name:"DISK",val:6}];
+const SLOTS=6, SEGS=16;
+let active=1, perfMode=1, playing=true;
+
+const grid=document.getElementById("grid"),
+      wsrail=document.getElementById("wsrail"),
+      perfbtns=document.getElementById("perfbtns"),
+      loads=document.getElementById("loads"),
+      toggleBox=document.getElementById("toggleBox"),
+      noteBody=document.getElementById("noteBody"),
+      edBody=document.getElementById("edBody"),
+      bayBox=document.getElementById("bayBox"),
+      editorBox=document.getElementById("editorBox"),
+      leds=[...document.querySelectorAll("#ledrail .led")];
+
+TOGGLES.forEach(t=>{
+  const b=document.createElement("button");
+  b.className="tog";
+  b.innerHTML=`<span class="chk"></span><span>${t.name}</span>`+
+              `<span class="frag">${t.frag?"△":""}</span>`;
+  b.setAttribute("aria-pressed",t.on);
+  b.addEventListener("click",()=>{
+    t.on=!t.on;
+    b.setAttribute("aria-pressed",t.on);
+  });
+  toggleBox.appendChild(b);
+});
+
+BARS.forEach(b=>{
+  const row=document.createElement("div");
+  row.className="bar";
+  row.innerHTML=`<span class="bname">${b.name}</span><span class="seg"></span><span class="bval">${b.val}%</span>`;
+  const seg=row.querySelector(".seg");
+  for(let i=0;i<SEGS;i++) seg.appendChild(document.createElement("i"));
+  loads.appendChild(row);
+  b.el=row;
+});
+function renderBars(){
+  BARS.forEach(b=>{
+    const lit=Math.round(b.val/100*SEGS);
+    [...b.el.querySelectorAll(".seg i")].forEach((s,i)=>{
+      s.className = i<lit ? (b.val>85 ? "on hot" : "on") : "";
+    });
+    b.el.querySelector(".bval").textContent=b.val+"%";
+  });
+}
+
+WORKSPACES.forEach(ws=>{
+  const b=document.createElement("button");
+  b.className="btn";
+  b.innerHTML=`<span class="num">${String(ws.id).padStart(2,"0")}</span>`+
+              `<span class="code">${ws.code}</span>`+
+              `<span class="cnt">${ws.mode==="editor"?"EDITOR":ws.apps.length+" APPS"}</span>`;
+  b.addEventListener("click",()=>{active=ws.id;render();});
+  wsrail.appendChild(b);
+});
+PERF.forEach((p,i)=>{
+  const b=document.createElement("button");
+  b.className="btn";
+  b.innerHTML=p.code+'<span class="w">'+p.watts+'</span>';
+  b.addEventListener("click",()=>{perfMode=i;renderPerf();});
+  perfbtns.appendChild(b);
+});
+function renderPerf(){[...perfbtns.children].forEach((b,i)=>b.setAttribute("aria-pressed",i===perfMode));}
+
+const btnRun=document.getElementById("btnRun"),btnStop=document.getElementById("btnStop");
+function renderTransport(){
+  btnRun.setAttribute("aria-pressed",playing);
+  btnStop.setAttribute("aria-pressed",!playing);
+}
+btnRun.addEventListener("click",()=>{playing=!playing;renderTransport();});
+btnStop.addEventListener("click",()=>{playing=false;renderTransport();});
+
+function render(){
+  const ws=WORKSPACES.find(w=>w.id===active);
+  const isEditor = ws.mode==="editor";
+
+  bayBox.style.display    = isEditor ? "none" : "";
+  editorBox.style.display = isEditor ? "" : "none";
+
+  if(isEditor){
+    edBody.innerHTML="";
+    ws.edLines.forEach((l,i)=>{
+      const d=document.createElement("div");
+      d.className="ln";
+      d.innerHTML=`<span>${i+1}</span><span>${l||"&nbsp;"}</span>`;
+      edBody.appendChild(d);
+    });
+    document.getElementById("edFile").textContent=ws.edFile;
+    document.getElementById("edCurLine").textContent=ws.edLines.length+1;
+    document.getElementById("edStat").textContent=`LN ${ws.edLines.length+1} · COL 1 · 412 WORDS`;
+  } else {
+    grid.innerHTML="";
+    for(let i=0;i<SLOTS;i++){
+      const app=ws.apps[i];
+      const el=document.createElement("button");
+      el.className="slot"+(app?"":" empty");
+      el.innerHTML=app
+        ? `<span class="idx">${String(i+1).padStart(2,"0")}</span><span class="nm">${app.n}</span><span class="tg">${app.t}</span>`
+        : `<span class="idx">${String(i+1).padStart(2,"0")}</span><span class="nm">— EMPTY —</span>`;
+      if(!app) el.disabled=true;
+      grid.appendChild(el);
+    }
+  }
+
+  noteBody.innerHTML="";
+  ws.lines.forEach((l,i)=>{
+    const d=document.createElement("div");
+    d.className="ln";
+    d.innerHTML=`<span>${i+1}</span><span>${l}</span>`;
+    noteBody.appendChild(d);
+  });
+  document.getElementById("noteFile").textContent=ws.note;
+  const nd=document.getElementById("noteDirty");
+  nd.textContent = ws.dirty ? "● UNSAVED" : "SAVED";
+  nd.style.color = ws.dirty ? "#FF5E2B" : "#7F5800";
+
+  document.getElementById("wsTitle").textContent=ws.title;
+  document.getElementById("bannerText").textContent="WORKSPACE — "+ws.code;
+  document.getElementById("modeline").textContent="SHELL LOCAL — "+ws.code+" MODE";
+  leds.forEach((l,i)=>l.dataset.on=(i===active-1)?"1":"0");
+  [...wsrail.querySelectorAll(".btn")].forEach((b,i)=>b.setAttribute("aria-pressed",i+1===active));
+}
+
+document.getElementById("resetBtn").addEventListener("click",()=>{
+  document.getElementById("wh").textContent="0.0";
+});
+
+let wrapOn=false;
+const wrapBtn=document.getElementById("wrapBtn");
+wrapBtn.addEventListener("click",()=>{
+  wrapOn=!wrapOn;
+  wrapBtn.setAttribute("aria-pressed",wrapOn);
+  edBody.classList.toggle("wrap",wrapOn);
+});
+
+function tick(){
+  const d=new Date(),p=n=>String(n).padStart(2,"0");
+  document.getElementById("time").textContent=p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds());
+  document.getElementById("date").textContent=p(d.getMonth()+1)+"/"+p(d.getDate())+"/"+p(d.getFullYear()%100);
+  const wh=document.getElementById("wh");
+  wh.textContent=(Number(wh.textContent)+0.01).toFixed(1);
+  BARS.forEach(b=>{b.val=Math.max(2,Math.min(99,b.val+Math.round((Math.random()-.5)*14)));});
+  renderBars();
+}
+renderBars();tick();setInterval(tick,1000);
+
+const annoBtn=document.getElementById("annoBtn");
+annoBtn.addEventListener("click",()=>{
+  const on=document.body.dataset.anno==="1";
+  document.body.dataset.anno=on?"0":"1";
+  annoBtn.setAttribute("aria-pressed",String(!on));
+});
+function fit(){
+  const stage=document.getElementById("stage"),tb=document.getElementById("toolbar");
+  const s=Math.min(1,(window.innerWidth-24)/1280);
+  stage.style.transform=`scale(${s})`;
+  stage.style.marginBottom=`${-800*(1-s)}px`;
+  tb.style.transform=`scale(${s})`;tb.style.transformOrigin="top center";
+}
+fit();window.addEventListener("resize",fit);
+render();renderPerf();renderTransport();
+</script>
+</body>
+</html>

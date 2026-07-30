@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pipOS — Console (ANSI semantic colour)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+ /* ANSI-16 inspired palette */
+ --bg:#0C0E12; --bezel:#15181e;
+ --fg:#C8CDD4;        /* default foreground */
+ --dim:#5A6270;       /* comments / muted */
+ --faint:#333944;     /* rules, empty cells */
+ --frame:#3E4A5C;     /* box drawing */
+ --key:#7AA2F7;       /* keys / labels        (blue)    */
+ --str:#9ECE6A;       /* strings / names      (green)   */
+ --num:#FF9E64;       /* numbers / values     (orange)  */
+ --path:#7DCFFF;      /* paths / files        (cyan)    */
+ --kw:#BB9AF7;        /* keywords / captions  (magenta) */
+ --ok:#9ECE6A;        /* ok / on              (green)   */
+ --warn:#E0AF68;      /* warning              (yellow)  */
+ --err:#F7768E;       /* error / critical     (red)     */
+ --sel:#2A3149;       /* selection bg */
+ --mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono","Consolas",monospace;
+ --cw:9.45px; --ch:18.6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#06070a;font-family:var(--mono);display:grid;place-items:center;overflow:auto;padding:24px 12px}
+#stage{width:1280px;height:800px;transform-origin:top center;position:relative;flex:none;
+ background:var(--bezel);border-radius:8px;box-shadow:inset 0 0 0 1px #232833;padding:14px}
+.screen{position:relative;width:100%;height:100%;background:var(--bg);border-radius:3px;overflow:hidden;display:grid;place-items:center}
+#grid{position:relative;z-index:2;font-family:var(--mono);font-size:15.8px;line-height:var(--ch);
+ letter-spacing:0;-webkit-font-smoothing:antialiased;user-select:none;color:var(--fg)}
+#grid .row{display:flex;height:var(--ch)}
+#grid .cell{width:var(--cw);min-width:var(--cw);max-width:var(--cw);
+ display:inline-block;text-align:center;white-space:pre}
+/* semantic classes */
+.fg{color:var(--fg)} .dm{color:var(--dim)} .ft{color:var(--faint)}
+.fr{color:var(--frame)} .key{color:var(--key)} .str{color:var(--str)}
+.num{color:var(--num)} .pth{color:var(--path)} .kw{color:var(--kw);font-weight:600}
+.ok{color:var(--ok)} .wn{color:var(--warn)} .er{color:var(--err)}
+.inv{background:var(--key);color:#0C0E12;font-weight:700}
+.invok{background:var(--ok);color:#0C0E12;font-weight:700}
+.invwn{background:var(--warn);color:#0C0E12;font-weight:700}
+.inver{background:var(--err);color:#0C0E12;font-weight:700}
+.hit{cursor:pointer}
+.hit:hover{background:var(--sel)}
+.toolbar{width:1280px;display:flex;gap:10px;align-items:center;margin-bottom:12px;flex:none}
+.toolbar h1{font-size:12px;letter-spacing:.14em;color:#5A6270;font-weight:400;flex:1}
+.note{font-size:11px;color:#3E4A5C}
+.themebar{width:1280px;display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;flex:none}
+.tbtn{border:1px solid #2a2f3a;background:#111319;color:#8b93a3;font-family:var(--mono);
+ font-size:10px;letter-spacing:.06em;padding:5px 9px;border-radius:2px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.tbtn:hover{border-color:#4a5262;color:#dfe4ec}
+.tbtn[aria-pressed="true"]{background:#e6e9f0;color:#14161c;border-color:#e6e9f0;font-weight:700}
+.dots{display:inline-flex;gap:2px}
+.dots i{width:6px;height:6px;border-radius:1px;display:block}
+.grp{font-size:9px;letter-spacing:.14em;color:#5A6270;align-self:center;padding:0 6px 0 10px;
+ border-left:1px solid #2a2f3a;margin-left:4px}
+.ratio{font-size:9px;opacity:.65;margin-left:6px}
+</style></head><body>
+<div class="toolbar"><h1>pipOS / CONSOLE — colour schemes</h1>
+<span class="note" id="tname">TOKYO NIGHT</span></div>
+<div class="themebar" id="themebar"></div>
+<div id="stage"><div class="screen"><div id="grid"></div></div></div>
+<script>
+const COLS=132,ROWS=40;
+const WS=[
+ {id:1,code:"DEV",title:"DEV / ODYSSEY",mode:"apps",note:"ws1-dev.md",dirty:true,
+  lines:["## sprint notes","- fix DPI scaling on rotate before the `0.3` tag",
+         "- HWiNFO index drift -> verify against Discover.ini","- ship v0.3 tag",
+         "> blocked: EC contention with G-Helper"],
+  apps:["VS CODE","TERMINAL","GITHUB DESKTOP","DOCKER","POSTMAN","FIREFOX DEV"],
+  tags:["Code.exe","wt.exe","GitHubDesktop.exe","Docker.exe","Postman.exe","firefox.exe -P dev"]},
+ {id:2,code:"MEDIA",title:"MEDIA / PLAYBACK",mode:"apps",note:"ws2-media.md",dirty:false,
+  lines:["## watchlist","- Odyssey (IMAX 70mm print)","- Dune 3 trailer cut","- re-encode 4k batch"],
+  apps:["VLC","SPOTIFY","PLEX","OBS STUDIO","AUDACITY"],
+  tags:["vlc.exe","Spotify.exe","Plex.exe","obs64.exe","audacity.exe"]},
+ {id:3,code:"GAME",title:"GAME / ARCADE",mode:"apps",note:"ws3-game.md",dirty:false,
+  lines:["## backlog","- finish Silksong","- test 8060S at `45W` cap","- controller remap"],
+  apps:["STEAM","XBOX","RETROARCH","DISCORD","G-HELPER","MOONLIGHT"],
+  tags:["steam.exe","shell:AppsFolder","retroarch.exe","Discord.exe","GHelper.exe","Moonlight.exe"]},
+ {id:4,code:"WRITE",title:"WRITE / MANUSCRIPT",mode:"editor",note:"ws4-write.md",dirty:false,
+  lines:["## outline","- act II pivot","- cut the dream sequence","- 2k words today"],
+  edFile:"chapter-04.md",
+  edLines:["# Chapter 04 - The Projection Booth","",
+   "The console woke in amber before he did, every field already filled with numbers he had not asked for. Frame count. Lamp hours.","",
+   "He put a hand flat on the glass; it was warm.","",
+   "ref: C:\\Users\\pip\\Documents\\odyssey\\draft-notes.md"],
+  apps:[],tags:[]},
+ {id:5,code:"DIAG",title:"DIAG / TELEMETRY",mode:"apps",note:"ws5-diag.md",dirty:false,
+  lines:["## sensor map","- Tctl = idx 10","- GPU Core Load = idx 44","! EC conflict: close Armoury Crate"],
+  apps:["HWINFO64","TASK MANAGER","CRYSTALDISK","EVENT VIEWER","RESMON","POWERSHELL"],
+  tags:["HWiNFO64.exe","taskmgr.exe","DiskInfo64.exe","eventvwr.msc","resmon.exe","pwsh.exe"]}
+];
+let active=1,wrapOn=false,perfMode=1,playing=true,whUsed=14.6;
+// ---- real fault state (drives W3 status + log) ----
+let pollerAlive=true, pollerAge=0, sensorDrift=false, cpuSpike=false;
+let LOG=[], logSeq=0;
+function stamp(){const n=new Date(),p=v=>String(v).padStart(2,'0');
+ return p(n.getHours())+':'+p(n.getMinutes())+':'+p(n.getSeconds());}
+function log(level,msg){LOG.push({t:stamp(),lv:level,msg:msg,n:++logSeq});
+ if(LOG.length>200)LOG.shift();}
+// priority: drift(3) > poller stale(2) > thermal(1) > nominal(0)
+function statusCode(){
+ if(sensorDrift)return 3;
+ if(pollerAge>30)return 2;
+ if(bars[0][1]>=85)return 1;
+ return 0;
+}
+const STATUS=[
+ {badge:' OK  ',cls:'invok',msg:'AUTO MODE — ALL PRESETS NOMINAL — sensors ready, poller alive'},
+ {badge:'WARN ',cls:'invwn',msg:'THERMAL LIMIT — CPU above 85%, package throttling expected'},
+ {badge:'WARN ',cls:'invwn',msg:'TOGGLE POLLER DOWN — switch states are stale, values not trustworthy'},
+ {badge:'CRIT ',cls:'inver',msg:'SENSOR MAP DRIFT — HWiNFO label mismatch, indices must be re-discovered'}
+];
+const toggles=[["WI-FI",1,0],["BLUETOOTH",0,0],["MUTE",0,0],["NIGHT LIGHT",1,1],["ROTATION LOCK",0,1]];
+const bars=[["CPU",34],["IGPU",12],["RAM",47],["VRAM",22],["DISK",6]];
+const perf=[["SILENT","15W"],["BALANCED","45W"],["TURBO","80W"]];
+
+let CH,CO,HIT;
+function clear(){CH=Array.from({length:ROWS},()=>Array(COLS).fill(' '));
+ CO=Array.from({length:ROWS},()=>Array(COLS).fill(null));
+ HIT=Array.from({length:ROWS},()=>Array(COLS).fill(null));}
+function put(x,y,c,col,h){if(y<0||y>=ROWS||x<0||x>=COLS)return;CH[y][x]=c;if(col)CO[y][x]=col;if(h)HIT[y][x]=h;}
+function txt(x,y,s,c,h){for(let i=0;i<s.length;i++)put(x+i,y,s[i],c,h);}
+function hrun(x,y,w,ch,c){for(let i=0;i<w;i++)put(x+i,y,ch,c);}
+function box(x,y,w,h,label){
+ const c='fr';
+ put(x,y,'┌',c);put(x+w-1,y,'┐',c);put(x,y+h-1,'└',c);put(x+w-1,y+h-1,'┘',c);
+ for(let i=1;i<w-1;i++){put(x+i,y,'─',c);put(x+i,y+h-1,'─',c);}
+ for(let j=1;j<h-1;j++){put(x,y+j,'│',c);put(x+w-1,y+j,'│',c);}
+ if(label){txt(x+2,y,'┤ '+label+' ├',c);for(let i=0;i<label.length;i++)CO[y][x+4+i]='kw';}}
+function fit(s,n){s=String(s);return (s+' '.repeat(n)).slice(0,n);}
+function rt(s,n){s=String(s);return (' '.repeat(n)+s).slice(-n);}
+// threshold colouring, like a real monitor
+function loadCol(p){return p>=85?'er':p>=60?'wn':'ok';}
+function bar(p,w){const on=Math.round(p/100*w);return {on:'█'.repeat(on),off:'░'.repeat(w-on)};}
+
+// markdown-ish syntax colouring for note/editor lines
+function mdLine(x,y,line,W){
+ const s=fit(line,W);
+ let cls='fg';
+ if(/^\s*#{1,6}\s/.test(line))cls='kw';        // heading
+ else if(/^\s*[-*]\s/.test(line))cls='fg';     // bullet
+ else if(/^\s*>/.test(line))cls='wn';          // quote / blocked
+ else if(/^\s*!/.test(line))cls='er';          // alert
+ for(let i=0;i<s.length;i++){
+   let c=cls;
+   const ch=s[i];
+   if(cls==='fg'&&/^\s*[-*]\s/.test(line)&&i===line.search(/[-*]/))c='key';
+   put(x+i,y,ch,c);
+ }
+ // inline `code` spans -> path colour
+ let m,re=/`([^`]+)`/g;
+ while((m=re.exec(line))!==null){
+   for(let i=m.index;i<m.index+m[0].length&&i<W;i++)CO[y][x+i]='num';
+ }
+ // trailing filename.ext -> path colour
+ let fm,fre=/([A-Za-z0-9_\-\\:\.]+\.(?:ini|md|exe|msc|py|json|txt))/g;
+ while((fm=fre.exec(line))!==null){
+   for(let i=fm.index;i<fm.index+fm[0].length&&i<W;i++)CO[y][x+i]='pth';
+ }
+}
+
+const FULL_W=130, LEFT_W=85, RX=87, RW=44;
+
+function compose(){
+ clear();
+ const ws=WS[active-1];
+
+ // ---- prompt-style header, like a shell line
+ txt(1,0,'pip','kw');txt(4,0,'OS','key');
+ txt(7,0,'~/'+ws.code.toLowerCase(),'pth');
+ txt(9+ws.code.length,0,'$','ok');
+ txt(11+ws.code.length,0,'shell','str');
+ txt(17+ws.code.length,0,'--local --mode='+ws.code.toLowerCase(),'dm');
+ txt(103,0,'[F1]','key');txt(108,0,'FUNCTIONS','dm',{t:'fn'});
+ txt(120,0,'[F2]','key');txt(125,0,'ALERTS','dm',{t:'al'});
+ hrun(1,1,FULL_W,'─','ft');
+
+ // ---- NOTES (2..10)
+ box(1,2,FULL_W,9,'NOTES');
+ txt(3,3,'file','key');txt(7,3,'=','dm');txt(8,3,fit(ws.note,22),'pth');
+ txt(112,3,ws.dirty?'●':'✓',ws.dirty?'wn':'ok');
+ txt(114,3,ws.dirty?'MODIFIED':'SAVED   ',ws.dirty?'wn':'ok');
+ ws.lines.slice(0,5).forEach((l,i)=>{txt(3,4+i,rt(i+1,2),'ft');mdLine(6,4+i,l,120);});
+ put(6,9,'█','ok');
+ let nx=80;
+ [['NEW','key'],['OPEN','key'],['SAVE','ok'],['SAVE AS','key'],['INSERT DATE','key']].forEach(([lbl,c])=>{
+   txt(nx,9,'[','ft');txt(nx+1,9,lbl,c);txt(nx+1+lbl.length,9,']','ft');nx+=lbl.length+3;});
+
+ // ---- SESSION (11..13) — key=value pairs
+ box(1,11,FULL_W,3,'SESSION');
+ const kv=(x,y,k,v,vc)=>{txt(x,y,k,'key');txt(x+k.length,y,'=','dm');txt(x+k.length+1,y,v,vc||'str');};
+ kv(3,12,'host','FLOW-Z13');
+ kv(22,12,'model','GZ302EA');
+ kv(42,12,'profile',ws.title,'str');
+ kv(76,12,'scale','2560×1600@200%','num');
+ kv(105,12,'uptime','04:12','num');
+
+ // ---- STATUS (14) — DERIVED from real conditions, single highest-priority match
+ const sc=statusCode(), st=STATUS[sc];
+ for(let i=0;i<FULL_W;i++)put(1+i,14,' ',st.cls);
+ txt(2,14,st.badge,st.cls);
+ txt(8,14,st.msg,st.cls);
+ // poller heartbeat, right-aligned in the bar
+ txt(FULL_W-22,14,pollerAlive?('poll +'+pollerAge+'s'):'poll DOWN',st.cls);
+
+ // ---- LOG (15) — most recent real entry
+ const last=LOG[LOG.length-1];
+ txt(1,15,'log','key');txt(4,15,'[','ft');
+ txt(5,15,last?last.t:stamp(),'num');txt(13,15,']','ft');
+ if(last){
+   const lvc=last.lv==='ERR'?'er':last.lv==='WARN'?'wn':last.lv==='OK'?'ok':'key';
+   txt(15,15,(last.lv+'    ').slice(0,5),lvc);
+   txt(21,15,fit(last.msg,96),'dm');
+ }
+ txt(FULL_W-9,15,rt('#'+logSeq,9),'ft');
+
+ // ---- LEFT: BAY or EDITOR (16..29)
+ if(ws.mode==='editor'){
+  box(1,16,LEFT_W,14,'EDITOR');
+  txt(3,17,'file','key');txt(7,17,'=','dm');txt(8,17,fit(ws.edFile,24),'pth');
+  txt(70,17,ws.dirty?'● MODIFIED':'✓ SAVED   ',ws.dirty?'wn':'ok');
+  let y=18;const W=78,yMax=27;
+  ws.edLines.forEach((l,li)=>{
+    if(y>yMax)return;
+    txt(3,y,rt(li+1,2),'ft');
+    if(wrapOn&&l.length>W){
+      const words=l.split(' ');let line='',first=true;
+      const flush=()=>{if(y>yMax)return;if(!first)txt(3,y,'  ','ft');
+        mdLine(6,y,line,W);y++;first=false;line='';};
+      words.forEach(w=>{if(line===''){line=w;}
+        else if((line+' '+w).length<=W){line+=' '+w;}else{flush();line=w;}});
+      if(line!=='')flush();
+    }else{mdLine(6,y,l,W);y++;}
+  });
+  let fx=3;
+  const chip=(lbl,c,hit)=>{txt(fx,28,'[','ft');txt(fx+1,28,lbl,c,hit);txt(fx+1+lbl.length,28,']','ft');fx+=lbl.length+3;};
+  chip('NEW','key');chip('OPEN','key');chip('SAVE','ok');chip('SAVE AS','key');
+  chip('WRAP',wrapOn?'invok':'key',{t:'wrap'});
+ }else{
+  box(1,16,LEFT_W,14,'LAUNCH BAY');
+  const cw=27, sy=[18,22];
+  for(let r=0;r<2;r++)for(let c=0;c<3;c++){
+    const i=r*3+c, x=3+c*cw, y=sy[r], name=ws.apps[i], tag=ws.tags[i];
+    if(name){
+      txt(x,y,rt(i+1,2),'ft');
+      txt(x+3,y,fit(name,22),'str',{t:'app',v:name});
+      txt(x+3,y+1,fit(tag||'',22),'pth',{t:'app',v:name});
+    }else{txt(x+3,y,'-- empty --','ft');}
+  }
+  txt(3,28,'slots','key');txt(8,28,'=','dm');
+  txt(9,28,ws.apps.length+'/6','num');
+  txt(66,28,'[','ft');txt(67,28,'EDIT BAY','key');txt(75,28,']','ft');
+ }
+
+ // ---- RIGHT STACK
+ box(RX,16,RW,7,'TOGGLES');
+ toggles.forEach(([name,on,frag],i)=>{const y=17+i;
+   txt(RX+2,y,on?'[✓]':'[ ]',on?'ok':'dm',{t:'tog',v:i});
+   txt(RX+6,y,fit(name,22),on?'fg':'dm',{t:'tog',v:i});
+   txt(RX+RW-7,y,on?'ON ':'OFF',on?'ok':'er',{t:'tog',v:i});
+   if(frag)txt(RX+RW-2,y,'!','wn');});
+
+ box(RX,23,RW,7,'SUBSYSTEM LOAD');
+ bars.forEach(([name,pct],i)=>{const y=24+i;
+   txt(RX+2,y,fit(name,5),'key');
+   const b=bar(pct,26),c=loadCol(pct);
+   txt(RX+8,y,b.on,c);txt(RX+8+b.on.length,y,b.off,'ft');
+   txt(RX+35,y,rt(pct+'%',5),c);});
+
+ box(RX,30,RW,6,'THERMAL / POWER');
+ const t1=(x,y,k,v,vc)=>{txt(x,y,k,'key');txt(x+k.length+1,y,v,vc);};
+ t1(RX+2,31,'cpu','61°C','num');t1(RX+14,31,'igpu','54°C','num');
+ t1(RX+2,32,'pkg','41.0W','num');t1(RX+14,32,'batt','−18.2W','er');
+ put(RX,33,'├','fr');put(RX+RW-1,33,'┤','fr');hrun(RX+1,33,RW-2,'─','ft');
+ t1(RX+2,34,'fan1','2410rpm','num');t1(RX+16,34,'fan2','3120rpm','num');
+
+ // ---- BANNER (31)
+ {const label=' '+ws.code+' ',WD=LEFT_W,dash=WD-2-label.length,
+    l=Math.floor(dash/2),r=dash-l;
+  txt(1,31,'═'.repeat(l+1),'ft');
+  txt(l+2,31,label,'kw');
+  txt(l+2+label.length,31,'═'.repeat(r+1),'ft');}
+
+ // ---- BATTERY / PERF (32..35)
+ box(1,32,LEFT_W,4,'BATTERY / ENERGY');
+ kv(3,33,'left','3:42','num');kv(16,33,'charge','68%','num');
+ kv(31,33,'used',whUsed.toFixed(1)+'Wh','num');
+ txt(76,33,'[','ft');txt(77,33,'RST','wn',{t:'rst'});txt(80,33,']','ft');
+ txt(3,34,'perf','key');txt(7,34,'=','dm');
+ perf.forEach(([code,w],i)=>{const x=10+i*22;
+   const on=i===perfMode;
+   txt(x,34,'['+code+' '+w+']',on?'invwn':'dm',{t:'perf',v:i});});
+
+ // ---- TRANSPORT (36)
+ txt(3,36,'[▶ RUN]',playing?'invok':'dm',{t:'run'});
+ txt(13,36,'[⏭ JOG]','dm',{t:'jog'});
+ txt(23,36,'[⏹ STOP]',!playing?'inv':'dm',{t:'stop'});
+ txt(36,36,playing?'● playing':'■ halted',playing?'ok':'dm');
+
+ // ---- SIM strip (39) — mockup-only fault injection, clearly marked
+ txt(1,39,'sim','er');txt(4,39,'»','ft');
+ txt(6,39,'[',"ft");txt(7,39,pollerAlive?'KILL POLLER':'START POLLER',pollerAlive?'wn':'ok',{t:'poll'});
+ txt(7+(pollerAlive?11:12),39,']','ft');
+ txt(22,39,'[','ft');txt(23,39,'SENSOR DRIFT',sensorDrift?'invwn':'wn',{t:'drift'});txt(35,39,']','ft');
+ txt(38,39,'[','ft');txt(39,39,'SPIKE CPU',cpuSpike?'invwn':'wn',{t:'spike'});txt(48,39,']','ft');
+ txt(52,39,'[','ft');txt(53,39,'CLEAR LOG','key',{t:'clr'});txt(62,39,']','ft');
+ txt(66,39,'these inject fault states so the status bar + log can be seen working','ft');
+
+ // ---- WORKSPACE TABS (37..38) — like shell tabs
+ const cell=25,gap=1;
+ WS.forEach((w,i)=>{const x=1+i*(cell+gap);txt(x+11,37,i+1===active?'●':'○',i+1===active?'ok':'ft');});
+ WS.forEach((w,i)=>{const x=1+i*(cell+gap),sel=i+1===active;
+   const cnt=w.mode==='editor'?'editor':w.apps.length+' apps';
+   if(sel){for(let k=0;k<cell;k++)put(x+k,38,' ','inv');
+     txt(x+2,38,String(w.id).padStart(2,'0'),'inv',{t:'ws',v:w.id});
+     txt(x+5,38,fit(w.code,10),'inv',{t:'ws',v:w.id});
+     txt(x+cell-9,38,rt(cnt,8),'inv',{t:'ws',v:w.id});}
+   else{txt(x,38,'┤','fr');
+     txt(x+2,38,String(w.id).padStart(2,'0'),'ft',{t:'ws',v:w.id});
+     txt(x+5,38,fit(w.code,10),'dm',{t:'ws',v:w.id});
+     txt(x+cell-9,38,rt(cnt,8),'ft',{t:'ws',v:w.id});
+     txt(x+cell-1,38,'├','fr');}});
+}
+
+const gridEl=document.getElementById('grid');
+function render(){
+ compose();
+ let html='';
+ for(let y=0;y<ROWS;y++){
+  html+='<div class="row">';
+  for(let x=0;x<COLS;x++){
+   const c=CO[y][x],h=HIT[y][x]?JSON.stringify(HIT[y][x]):null;
+   let ch=CH[y][x];
+   ch=ch==='&'?'&amp;':ch==='<'?'&lt;':ch==='>'?'&gt;':ch===' '?'&nbsp;':ch;
+   html+='<span class="'+('cell'+(c?' '+c:'')+(h?' hit':''))+'"'+
+         (h?" data-hit='"+h.replace(/'/g,'&#39;')+"'":'')+'>'+ch+'</span>';
+  }
+  html+='</div>';
+ }
+ gridEl.innerHTML=html;
+}
+gridEl.addEventListener('click',e=>{
+ const t=e.target.closest('[data-hit]');if(!t)return;
+ const h=JSON.parse(t.getAttribute('data-hit'));
+ if(h.t==='tog'){
+   const was=toggles[h.v][1];toggles[h.v][1]=was?0:1;
+   const nm=toggles[h.v][0], frag=toggles[h.v][2];
+   if(!pollerAlive)log('WARN',nm+' set '+(was?'OFF':'ON')+' — poller down, state not confirmed');
+   else log(frag?'WARN':'INFO',nm+' -> '+(was?'OFF':'ON')+(frag?'  (unofficial API, may fail silently)':''));
+ }
+ else if(h.t==='ws'){const prev=WS[active-1].code;active=h.v;
+   const w=WS[active-1];
+   log('INFO','workspace '+prev+' -> '+w.code+'  ('+(w.mode==='editor'?'editor mode':w.apps.length+' bay entries')+')');}
+ else if(h.t==='perf'){perfMode=h.v;
+   log('INFO','perf mode -> '+perf[h.v][0]+' ('+perf[h.v][1]+') via G-Helper hotkey');}
+ else if(h.t==='wrap'){wrapOn=!wrapOn;log('INFO','editor wrap '+(wrapOn?'ON  ClipString=1':'OFF ClipString=0'));}
+ else if(h.t==='rst'){whUsed=0;log('OK','energy counter reset to 0.0Wh');}
+ else if(h.t==='run'){playing=!playing;log('INFO','transport '+(playing?'RUN':'PAUSE'));}
+ else if(h.t==='stop'){playing=false;log('INFO','transport STOP');}
+ else if(h.t==='poll'){pollerAlive=!pollerAlive;
+   if(pollerAlive){pollerAge=0;log('OK','toggle poller restarted — states re-synced');}
+   else log('ERR','toggle poller stopped — switch states will go stale in 30s');}
+ else if(h.t==='drift'){sensorDrift=!sensorDrift;
+   log(sensorDrift?'ERR':'OK',sensorDrift?'HWiNFO label mismatch on IdxCPUTemp — expected "CPU (Tctl/Tdie)"'
+                                          :'sensor map re-verified, all labels match');}
+ else if(h.t==='spike'){cpuSpike=!cpuSpike;
+   log(cpuSpike?'WARN':'INFO','CPU load '+(cpuSpike?'forced high (sim)':'released to normal'));}
+ else if(h.t==='clr'){LOG=[];logSeq=0;log('INFO','log cleared');}
+ render();
+});
+let lastThermal=false;
+function tick(){
+ // poller heartbeat
+ if(pollerAlive)pollerAge=0; else pollerAge++;
+ // load simulation (cpuSpike forces the thermal branch)
+ bars.forEach((b,i)=>{
+   if(i===0&&cpuSpike){b[1]=Math.min(99,Math.max(88,b[1]+Math.round((Math.random()-.4)*6)));}
+   else b[1]=Math.max(2,Math.min(99,b[1]+Math.round((Math.random()-.5)*16)));
+ });
+ // log threshold crossings once, not every tick
+ const th=bars[0][1]>=85;
+ if(th&&!lastThermal)log('WARN','CPU '+bars[0][1]+'% — crossed 85% thermal threshold');
+ if(!th&&lastThermal)log('OK','CPU back below threshold ('+bars[0][1]+'%)');
+ lastThermal=th;
+ if(!pollerAlive&&pollerAge===31)log('ERR','poller stale >30s — W3 now reporting TOGGLE POLLER DOWN');
+ whUsed+=0.01;render();}
+log('OK','shell started — 18 widgets, workspace '+WS[active-1].code+' restored from Variables.inc');
+render();setInterval(tick,1000);
+
+// ---------------- CONSOLE COLOUR SCHEMES ----------------
+// Each defines the full semantic set the composer uses.
+const SCHEMES={
+"TOKYO NIGHT":{bg:"#0C0E12",bezel:"#15181e",fg:"#C8CDD4",dim:"#5A6270",faint:"#333944",frame:"#3E4A5C",
+ key:"#7AA2F7",str:"#9ECE6A",num:"#FF9E64",path:"#7DCFFF",kw:"#BB9AF7",ok:"#9ECE6A",warn:"#E0AF68",err:"#F7768E",sel:"#2A3149"},
+"DRACULA":{bg:"#282A36",bezel:"#21222C",fg:"#F8F8F2",dim:"#6272A4",faint:"#44475A",frame:"#6272A4",
+ key:"#8BE9FD",str:"#50FA7B",num:"#BD93F9",path:"#8BE9FD",kw:"#FF79C6",ok:"#50FA7B",warn:"#F1FA8C",err:"#FF5555",sel:"#44475A"},
+"SOLARIZED DARK":{bg:"#002B36",bezel:"#00212B",fg:"#93A1A1",dim:"#586E75",faint:"#073642",frame:"#586E75",
+ key:"#268BD2",str:"#859900",num:"#CB4B16",path:"#2AA198",kw:"#D33682",ok:"#859900",warn:"#B58900",err:"#DC322F",sel:"#073642"},
+"GRUVBOX DARK":{bg:"#282828",bezel:"#1D2021",fg:"#EBDBB2",dim:"#928374",faint:"#504945",frame:"#665C54",
+ key:"#83A598",str:"#B8BB26",num:"#D3869B",path:"#8EC07C",kw:"#FABD2F",ok:"#B8BB26",warn:"#FE8019",err:"#FB4934",sel:"#3C3836"},
+"NORD":{bg:"#2E3440",bezel:"#242933",fg:"#D8DEE9",dim:"#616E88",faint:"#434C5E",frame:"#4C566A",
+ key:"#81A1C1",str:"#A3BE8C",num:"#B48EAD",path:"#88C0D0",kw:"#5E81AC",ok:"#A3BE8C",warn:"#EBCB8B",err:"#BF616A",sel:"#3B4252"},
+"CATPPUCCIN":{bg:"#1E1E2E",bezel:"#181825",fg:"#CDD6F4",dim:"#6C7086",faint:"#45475A",frame:"#585B70",
+ key:"#89B4FA",str:"#A6E3A1",num:"#FAB387",path:"#94E2D5",kw:"#CBA6F7",ok:"#A6E3A1",warn:"#F9E2AF",err:"#F38BA8",sel:"#313244"},
+"MONOKAI":{bg:"#272822",bezel:"#1E1F1C",fg:"#F8F8F2",dim:"#75715E",faint:"#49483E",frame:"#75715E",
+ key:"#66D9EF",str:"#A6E22E",num:"#AE81FF",path:"#66D9EF",kw:"#F92672",ok:"#A6E22E",warn:"#E6DB74",err:"#F92672",sel:"#3E3D32"},
+"ONE DARK":{bg:"#282C34",bezel:"#21252B",fg:"#ABB2BF",dim:"#5C6370",faint:"#3E4451",frame:"#4B5263",
+ key:"#61AFEF",str:"#98C379",num:"#D19A66",path:"#56B6C2",kw:"#C678DD",ok:"#98C379",warn:"#E5C07B",err:"#E06C75",sel:"#3E4451"},
+"SOLARIZED LIGHT":{bg:"#FDF6E3",bezel:"#EEE8D5",fg:"#586E75",dim:"#93A1A1",faint:"#D8D2C0",frame:"#93A1A1",
+ key:"#268BD2",str:"#859900",num:"#CB4B16",path:"#2AA198",kw:"#D33682",ok:"#859900",warn:"#B58900",err:"#DC322F",sel:"#EEE8D5"},
+"AMBER HYBRID":{bg:"#0A0700",bezel:"#100E0A",fg:"#FFB000",dim:"#7F5800",faint:"#4A3300",frame:"#8A5F00",
+ key:"#CC8C00",str:"#FFC94D",num:"#FFE08A",path:"#D9A441",kw:"#FFD27A",ok:"#3BFF6A",warn:"#FF9E2B",err:"#FF5E2B",sel:"#2A1D00"},
+"GREEN HYBRID":{bg:"#020A04",bezel:"#0A100B",fg:"#33FF66",dim:"#148030",faint:"#0B3D18",frame:"#1A6B2E",
+ key:"#22CC48",str:"#7DFFA0",num:"#B6FFCB",path:"#4FD98A",kw:"#A8FFC0",ok:"#33FF66",warn:"#FFD23B",err:"#FF5E4A",sel:"#052610"},
+"HC BLACK":{bg:"#000000",bezel:"#0A0A0A",fg:"#FFFFFF",dim:"#8A8A8A",faint:"#4A4A4A",frame:"#7A7A7A",
+ key:"#00D7FF",str:"#5FFF5F",num:"#FFD75F",path:"#00FFD7",kw:"#FF5FFF",ok:"#5FFF5F",warn:"#FFAF00",err:"#FF5F5F",sel:"#1F1F1F"},
+"HC WHITE":{bg:"#FFFFFF",bezel:"#E4E4E4",fg:"#000000",dim:"#555555",faint:"#AAAAAA",frame:"#333333",
+ key:"#0000CC",str:"#006600",num:"#994400",path:"#006688",kw:"#8800AA",ok:"#006600",warn:"#8A5A00",err:"#CC0000",sel:"#DDDDFF"},
+"HC AMBER":{bg:"#000000",bezel:"#0B0800",fg:"#FFC53D",dim:"#9A6E00",faint:"#5A4000",frame:"#B58200",
+ key:"#FFA500",str:"#FFDD77",num:"#FFF0B3",path:"#FFB733",kw:"#FFE680",ok:"#3BFF6A",warn:"#FF9500",err:"#FF4A3D",sel:"#2A1D00"},
+"HC GREEN":{bg:"#000000",bezel:"#000A03",fg:"#4DFF7A",dim:"#12A03C",faint:"#0A5C22",frame:"#1BC44C",
+ key:"#00E05A",str:"#8FFFA8",num:"#C6FFD4",path:"#33FF99",kw:"#B3FFC6",ok:"#4DFF7A",warn:"#FFD23B",err:"#FF5F5F",sel:"#052610"},
+"HC YELLOW":{bg:"#000000",bezel:"#0A0A00",fg:"#FFE800",dim:"#9A8F00",faint:"#5A5400",frame:"#C7B800",
+ key:"#FFFFFF",str:"#FFF566",num:"#FFFFB0",path:"#E8FF00",kw:"#FFFFFF",ok:"#66FF66",warn:"#FFA500",err:"#FF4444",sel:"#242200"},
+"HC CYAN":{bg:"#000000",bezel:"#000A0B",fg:"#00E5FF",dim:"#00889A",faint:"#004E59",frame:"#00AABF",
+ key:"#FFFFFF",str:"#7DF9FF",num:"#B3FCFF",path:"#00C2D9",kw:"#CFFAFF",ok:"#5FFF5F",warn:"#FFD75F",err:"#FF5F5F",sel:"#00232A"},
+"HC MAGENTA":{bg:"#000000",bezel:"#0A000A",fg:"#FF6FE5",dim:"#A33D93",faint:"#5C2253",frame:"#C44FB0",
+ key:"#FFFFFF",str:"#FF9BEE",num:"#FFC6F5",path:"#E859D0",kw:"#FFD9F7",ok:"#5FFF5F",warn:"#FFD75F",err:"#FF4444",sel:"#2A0026"},
+"HC NAVY":{bg:"#001028",bezel:"#000A1C",fg:"#FFD400",dim:"#5A7A9A",faint:"#2A4460",frame:"#7FA8CC",
+ key:"#66D9FF",str:"#FFE766",num:"#FFF3B0",path:"#33C4FF",kw:"#FFFFFF",ok:"#5FFF8A",warn:"#FFA500",err:"#FF6B6B",sel:"#052A4A"},
+"MONO WHITE":{bg:"#000000",bezel:"#080808",fg:"#FFFFFF",dim:"#909090",faint:"#4A4A4A",frame:"#B0B0B0",
+ key:"#E0E0E0",str:"#FFFFFF",num:"#F0F0F0",path:"#D0D0D0",kw:"#FFFFFF",ok:"#FFFFFF",warn:"#C0C0C0",err:"#FFFFFF",sel:"#222222"},
+"NIGHT RED":{bg:"#000000",bezel:"#0A0000",fg:"#FF4136",dim:"#A32820",faint:"#5C1712",frame:"#D94438",
+ key:"#FF7A70",str:"#FF9A92",num:"#FFC2BD",path:"#FF6A5E",kw:"#FFB3AD",ok:"#FF4136",warn:"#FF8C42",err:"#FFFFFF",sel:"#2A0805"}
+};
+const KEYS=["bg","bezel","fg","dim","faint","frame","key","str","num","path","kw","ok","warn","err","sel"];
+function applyScheme(name){
+ const t=SCHEMES[name];if(!t)return;
+ const r=document.documentElement.style;
+ KEYS.forEach(k=>r.setProperty("--"+k,t[k]));
+ document.getElementById("tname").textContent=name;
+ [...document.querySelectorAll(".tbtn")].forEach(b=>b.setAttribute("aria-pressed",b.dataset.s===name));
+ document.body.style.background = lum(t.bg)>0.5 ? "#c9c9c9" : "#06070a";
+}
+// WCAG relative luminance -> contrast ratio, shown per scheme
+function lum(h){h=h.replace("#","");const v=[0,2,4].map(i=>parseInt(h.substr(i,2),16)/255)
+ .map(c=>c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4));
+ return 0.2126*v[0]+0.7152*v[1]+0.0722*v[2];}
+function ratio(a,b){const la=lum(a),lb=lum(b),hi=Math.max(la,lb),lo=Math.min(la,lb);
+ return (hi+0.05)/(lo+0.05);}
+function worstRatio(t){return Math.min(...["fg","key","str","num","err","ok","warn"]
+ .map(k=>ratio(t.bg,t[k])));}
+
+const tbar=document.getElementById("themebar");
+const HC_START="HC BLACK";
+Object.keys(SCHEMES).forEach((name,i)=>{
+ const t=SCHEMES[name];
+ if(name===HC_START){
+   const h=document.createElement("span");
+   h.className="grp";h.textContent="HIGH CONTRAST →";
+   tbar.appendChild(h);
+ }
+ const b=document.createElement("button");
+ b.className="tbtn";b.dataset.s=name;
+ const wr=worstRatio(t);
+ const grade=wr>=7?"AAA":wr>=4.5?"AA":wr>=3?"AA-lg":"low";
+ b.innerHTML='<span class="dots">'+
+   ["key","str","num","path","kw","err"].map(k=>'<i style="background:'+t[k]+'"></i>').join('')+
+   '</span>'+name+'<span class="ratio">'+wr.toFixed(1)+' '+grade+'</span>';
+ b.setAttribute("aria-pressed",i===0);
+ b.onclick=()=>applyScheme(name);
+ tbar.appendChild(b);
+});
+const snames=Object.keys(SCHEMES);let si=0;
+addEventListener("keydown",e=>{
+ if(e.key==="]"){si=(si+1)%snames.length;applyScheme(snames[si]);}
+ if(e.key==="["){si=(si-1+snames.length)%snames.length;applyScheme(snames[si]);}
+});
+applyScheme("TOKYO NIGHT");
+
+function scale(){const s=Math.min(1,(window.innerWidth-24)/1280);const st=document.getElementById('stage');
+ st.style.transform='scale('+s+')';st.style.marginBottom=(-800*(1-s))+'px';
+ const tb=document.querySelector('.toolbar');tb.style.transform='scale('+s+')';tb.style.transformOrigin='top center';}
+scale();addEventListener('resize',scale);
+</script></body></html>

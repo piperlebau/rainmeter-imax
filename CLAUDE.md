@@ -7,7 +7,7 @@ Read the full spec for detail; obey this file always.
 
 An amber-phosphor Rainmeter shell for the ASUS ROG Flow Z13 (2025, GZ302EA) touchscreen.
 Eighteen widgets, five workspaces, IMAX-projector-console aesthetic. The visual authority is
-`pipOS-wireframe-v20.html` — when in doubt about layout, colour, or size, measure it there.
+`docs/pipOS-wireframe-v21.html` — when in doubt about layout, colour, or size, measure it there.
 
 ## Non-negotiable constraints
 

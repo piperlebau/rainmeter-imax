@@ -1,9 +1,15 @@
-; ============================================================
-;  Banner.inc  —  W6 workspace banner
-;  @Included into pipOS.ini (NOT a separate skin).
-;  STUB for Milestone A1. Fill in against pipOS-wireframe-v20.html.
-;  All positions from @Resources\Variables.inc — no literals.
-;  After adding meters, run: python tests\check_geometry.py
-; ============================================================
+; Banner.inc — W6 WORKSPACE banner (bottom of left column).
 
-; TODO(A1): implement W6 workspace banner
+[Banner]
+Meter=Shape
+Shape=Rectangle 50,653,894,37,3 | StrokeWidth 1 | Stroke Color #Frame# | FillColor 0,0,0,1
+
+[BannerTxt]
+Meter=String
+MeterStyle=sBtn
+FontColor=#Kw#
+FontSize=22
+StringAlign=CENTERCENTER
+X=497
+Y=671
+Text=✳  WORKSPACE — DEV  ✳
