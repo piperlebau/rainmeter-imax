@@ -21,7 +21,15 @@ VARS = ROOT / "@Resources" / "Variables.inc"
 
 
 def read(p):
-    return (ROOT / p).read_text(encoding="utf-8") if (ROOT / p).exists() else None
+    """Skin files are UTF-16 LE with BOM (Rainmeter requirement); everything
+    else is UTF-8. Detect by BOM."""
+    fp = ROOT / p
+    if not fp.exists():
+        return None
+    raw = fp.read_bytes()
+    if raw.startswith(b"\xff\xfe") or raw.startswith(b"\xfe\xff"):
+        return raw.decode("utf-16")
+    return raw.decode("utf-8")
 
 
 def var_defined(text, name):
@@ -90,7 +98,8 @@ def check_shared_logic():
     import glob, os
     logic_dir = ROOT / "@Resources" / "logic"
     for f in sorted(logic_dir.glob("*.inc")):
-        body = f.read_text(encoding="utf-8")
+        raw = f.read_bytes()
+        body = raw.decode("utf-16") if raw.startswith(b"\xff\xfe") else raw.decode("utf-8")
         for line in body.splitlines():
             t = line.strip()
             if t.lower().startswith("meter="):

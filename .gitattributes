@@ -1,0 +1,5 @@
+# Rainmeter reads non-ASCII skin text correctly only from UTF-16 LE with BOM.
+# Working tree keeps UTF-16LE-BOM + CRLF (what Rainmeter/Windows want);
+# git stores UTF-8 internally so diffs stay readable.
+*.ini text working-tree-encoding=UTF-16LE-BOM eol=CRLF
+*.inc text working-tree-encoding=UTF-16LE-BOM eol=CRLF

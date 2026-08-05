@@ -51,18 +51,26 @@ GridCols=132
 GridRows=40
 CellW=9.45
 CellH=18.6
-TuiFontSize=15.8
+; points (= 15.8px * 0.75); cell metrics above stay in px
+TuiFontSize=11.85
 TuiOriginX=16
 TuiOriginY=14
 
 ; ---- type ----
+; Rainmeter FontSize is in POINTS; the wireframe speaks CSS PIXELS.
+; Every value here = wireframe px * 0.75. Keep new sizes in points too.
 FontMain=IBM Plex Mono
-FontSizeBody=12
-FontSizeLabel=10
-FontSizeCaption=10
-FontSizeReadout=17
-FontSizeBanner=22
-FontSizeBrand=23
+FontSizeBody=9
+FontSizeLabel=7.5
+FontSizeCaption=7.5
+FontSizeReadout=12.75
+FontSizeBanner=16.5
+FontSizeBrand=17.25
+
+; ---- DPI ----
+; Physical px per logical px on the device (Z13: 2560x1600 at 200% = 2).
+; Used by the child skins to !Move themselves into their reserved holes.
+DpiScale=2
 
 ; ---- child-skin hole positions (derived; keep in sync with pipOS.ini frames) ----
 ; Notes (W17) and Editor (W18) panes are separate skins that land inside

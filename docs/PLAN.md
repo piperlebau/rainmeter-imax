@@ -44,6 +44,16 @@ Widget geometry was measured from v21 and normalised to the 1280×800 skin space
   to run (the harness needs its Chromium).*
 - Reconciled vs. the stale skeleton: left column 616→**894px** (v21), Notes=full-width top pane,
   Editor swaps into the Launch-Bay slot; token names unified to design-system roles.
+- **Device feedback round 1** (Z13 screenshots of both variants):
+  - *Mojibake everywhere* → Rainmeter reads skin text as ANSI unless UTF-16 LE BOM. All
+    `.ini`/`.inc` converted; `.gitattributes` `working-tree-encoding=UTF-16LE-BOM eol=CRLF`
+    keeps repo diffs readable; test readers BOM-aware. **Keep new skin files UTF-16 LE BOM.**
+  - *Text ~33% oversized* (brand collided with modeline) → Rainmeter `FontSize` is POINTS,
+    wireframe is CSS px. All sizes converted ×0.75. **Author sizes in points from now on.**
+  - *TUI* — full-grid background added (desktop no longer bleeds through), status row was
+    green-on-green → ink-on-fill. Full 40-row build stays Milestone D.
+  - *Notes/Editor child skins floated at 0,0* → they now `!Move` into their reserved holes via
+    `DpiScale=2` (assumes main skin at screen 0,0). Editor should only be loaded in WRITE mode.
 - **Next: Milestone B** — live data + control (wire measures to meters, workspace switching,
   toggle actions, theme cycling, launch commands).
 
