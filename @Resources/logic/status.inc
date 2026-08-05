@@ -8,9 +8,10 @@
 
 [mPollerAge]
 Measure=Calc
-; seconds since sensors.ps1 last wrote its timestamp
-Formula=(#CURRENTSECTION#)
-; TODO(B): replace with (Time - poller ts) once toggles.inc parses the file
+; seconds since sensors.ps1 last wrote its timestamp.
+; TODO(B2): poller not built yet — 0 keeps priority 2 quiet instead of
+; erroring every update (the old stub was a self-reference).
+Formula=0
 DynamicVariables=1
 
 [mPollerStale]
@@ -24,13 +25,13 @@ Formula=(#DriftFlag# > 0) * 3 + (#DriftFlag# = 0) * (mPollerStale > 0) * 2 + (#D
 DynamicVariables=1
 ; Each variant binds its own meters to these; the codes are the contract.
 IfCondition=(mStatusCode = 3)
-IfTrueAction=[!SetVariable StatusMsg "CRIT  SENSOR MAP DRIFT — HWiNFO label mismatch, re-run Discover"][!SetVariable StatusSev "err"]
+IfTrueAction=[!SetVariable StatusMsg "CRIT  SENSOR MAP DRIFT — HWiNFO label mismatch, re-run Discover"][!SetVariable StatusSev "err"][!SetVariable SevColor "#Err#"]
 IfCondition2=(mStatusCode = 2)
-IfTrueAction2=[!SetVariable StatusMsg "WARN  TOGGLE POLLER DOWN — switch states are stale"][!SetVariable StatusSev "warn"]
+IfTrueAction2=[!SetVariable StatusMsg "WARN  TOGGLE POLLER DOWN — switch states are stale"][!SetVariable StatusSev "warn"][!SetVariable SevColor "#Warn#"]
 IfCondition3=(mStatusCode = 1)
-IfTrueAction3=[!SetVariable StatusMsg "WARN  THERMAL LIMIT — package throttling expected"][!SetVariable StatusSev "warn"]
+IfTrueAction3=[!SetVariable StatusMsg "WARN  THERMAL LIMIT — package throttling expected"][!SetVariable StatusSev "warn"][!SetVariable SevColor "#Warn#"]
 IfCondition4=(mStatusCode = 0)
-IfTrueAction4=[!SetVariable StatusMsg "OK    AUTO MODE — ALL PRESETS NOMINAL"][!SetVariable StatusSev "ok"]
+IfTrueAction4=[!SetVariable StatusMsg "OK    AUTO MODE — ALL PRESETS NOMINAL"][!SetVariable StatusSev "ok"][!SetVariable SevColor "#Ok#"]
 
 ; ---- log ring buffer (Lua — Rainmeter has no arrays, §6.1a) ----
 [mLog]

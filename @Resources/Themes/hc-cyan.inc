@@ -1,4 +1,7 @@
 [Variables]
+; PHOSPHOR cycle: FUNCTIONS rewrites @IncludeTheme to NextTheme in all skins
+ThemeSlug=hc-cyan
+NextTheme=mono-white
 ; HC CYAN — cyan phosphor on pure black. DERIVED from the HC AMBER role
 ; structure (design system lists HC CYAN at WCAG 7.1); confirm on device.
 ThemeName=HC CYAN

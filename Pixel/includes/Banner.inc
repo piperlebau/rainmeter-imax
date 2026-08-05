@@ -12,4 +12,5 @@ FontSize=16.5
 StringAlign=CENTERCENTER
 X=497
 Y=671
-Text=✳  WORKSPACE — DEV  ✳
+Text=✱  WORKSPACE — [#WSName[#Workspace]]  ✱
+DynamicVariables=1

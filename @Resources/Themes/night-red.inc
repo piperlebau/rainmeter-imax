@@ -1,4 +1,7 @@
 [Variables]
+; PHOSPHOR cycle: FUNCTIONS rewrites @IncludeTheme to NextTheme in all skins
+ThemeSlug=night-red
+NextTheme=hc-amber
 ; NIGHT RED — preserves dark adaptation; pure-black ground.
 ; From the pipOS design system (WCAG 6.1). err=white since red is the base hue.
 ThemeName=NIGHT RED

@@ -1,4 +1,7 @@
 [Variables]
+; PHOSPHOR cycle: FUNCTIONS rewrites @IncludeTheme to NextTheme in all skins
+ThemeSlug=hc-amber
+NextTheme=hc-green
 ; HC AMBER — the IMAX look pushed to maximum legibility.
 ; Safest against 200% DPI softening (§16 item 4). WCAG 6.3 (AA).
 ThemeName=HC AMBER

@@ -1,4 +1,5 @@
-; Session.inc — W2 SESSION INFORMATION, W3 STATUS strip, W4 UPTIME strip (v21)
+; Session.inc — W2 SESSION INFORMATION, W3 STATUS strip (live severity),
+;               W4 UPTIME/DATE/TIME strip (live). Milestone B.
 
 [SessFrame]
 Meter=Shape
@@ -39,18 +40,26 @@ MeterStyle=sBody
 FontColor=#Str#
 X=180
 Y=316
-Text=DEV / ODYSSEY
+DynamicVariables=1
+Text=[#WSName[#Workspace]] / ODYSSEY
+
+; W3 — fill colour IS the severity (design law 2); logic\status.inc
+; owns #SevColor#/#StatusMsg#.
 
 [StatusFill]
 Meter=Shape
-Shape=Rectangle 50,346,894,24 | FillColor #Ok# | StrokeWidth 0
+Shape=Rectangle 50,346,894,24 | FillColor #SevColor# | StrokeWidth 0
+DynamicVariables=1
 
 [StatusTxt]
 Meter=String
 MeterStyle=sInk
 X=64
 Y=350
-Text=STATUS: AUTO MODE      ALL PRESETS NOMINAL
+DynamicVariables=1
+W=870
+H=17
+Text=#StatusMsg#
 
 [UptimeBox]
 Meter=Shape
@@ -62,4 +71,5 @@ MeterStyle=sBody
 FontColor=#Fg#
 X=64
 Y=384
-Text=UPTIME 0004:12 (HH:MM)      DATE 07/30/26      TIME 04:14:44
+DynamicVariables=1
+Text=UPTIME [mUptime] (HH:MM)      DATE [mDate]      TIME [mTime]

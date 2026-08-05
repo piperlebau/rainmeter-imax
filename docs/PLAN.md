@@ -54,8 +54,29 @@ Widget geometry was measured from v21 and normalised to the 1280×800 skin space
     green-on-green → ink-on-fill. Full 40-row build stays Milestone D.
   - *Notes/Editor child skins floated at 0,0* → they now `!Move` into their reserved holes via
     `DpiScale=2` (assumes main skin at screen 0,0). Editor should only be loaded in WRITE mode.
-- **Next: Milestone B** — live data + control (wire measures to meters, workspace switching,
-  toggle actions, theme cycling, launch commands).
+- **Device feedback round 2** — Pixel render verified clean (encoding + sizes correct).
+  Fixed: child-skin `!Move` operates in the DPI-scaled space (dropped the ×2), banner `✳`
+  had an emoji presentation on Windows → swapped to `✱` (U+2731).
+- **Milestone B1 built** (needs on-device verification):
+  - `logic/` completed: `mIGPUTemp`, `mVRAMDed`+`mVRAMPct`, `mBattLeft`, `mTime/mDate/mUptime`,
+    per-bar threshold-colour mappers (`BarCol*`), `SevColor` from the status machine, FileView
+    bay children (`mBayFile/Name/Go 1..6`), broken poller stub fixed.
+  - Pixel live: status strip (severity fill + message), uptime/date/clock, subsystem Bar meters
+    with threshold colours + cell separators, HWiNFO values gated to `—` while `Idx*=0` (law 5),
+    negative battery draw in `err`, perf-mode buttons live on `#PerfMode#` (commanded-not-
+    confirmed, logged, `△`), RST resets the energy accumulator.
+  - Workspace switching: rail taps set+persist `Workspace`/`WSMode`, active-tab inverse fill,
+    LEDs/modeline/banner/profile follow, WS4 (WRITE) hides the bay group and activates the
+    Editor child skin at identical 230px geometry.
+  - Launch bay is live: slots populate from `@Resources\Workspaces\WS<N>\*.url` and launch on
+    tap; empty slots show `— EMPTY —`. **Requires the third-party FileView plugin** — install
+    it or the bay stays empty (bundle it in the Phase-4 `.rmskin`).
+  - FUNCTIONS now cycles the phosphor theme (hc-amber → hc-green → hc-cyan → mono-white →
+    night-red) across all four skins via `NextTheme` chain + `!RefreshApp`.
+  - TUI status row severity-coloured from the same `#SevColor#`.
+- **B2 (next)**: the toggle poller (`sensors.ps1`, PS 5.1 + WinRT radios), toggle tap actions,
+  poller-staleness wiring (`mPollerAge`), AHK hookup for perf mode + transport, battery
+  time-left H:MM formatting, HWiNFO index discovery on device (`Tools\Discover.ini`).
 
 ## Open questions
 1. Confirm Z13 panel = 2560×1600.

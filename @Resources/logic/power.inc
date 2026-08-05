@@ -29,3 +29,12 @@ DynamicVariables=1
 Measure=String
 String=#PerfMode#
 DynamicVariables=1
+
+[mBattLeft]
+Measure=Registry
+RegHKey=HKEY_CURRENT_USER
+RegKey=SOFTWARE\HWiNFO64\VSB
+RegValue=ValueRaw#IdxBattLeft#
+DynamicVariables=1
+; NOTE: HWiNFO reports estimated remaining time in minutes; formatting to
+; H:MM happens variant-side. Gated on IdxBattLeft like every HWiNFO value.

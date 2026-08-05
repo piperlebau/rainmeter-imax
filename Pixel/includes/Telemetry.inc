@@ -1,5 +1,8 @@
-; Telemetry.inc — right column: W8 TOGGLES, W13 SUBSYSTEM LOAD, W9/10 THERMAL/POWER,
-;                  W14 BATTERY/ENERGY, W16 PERFORMANCE MODE. Static values (A1).
+; Telemetry.inc — right column, Milestone B (live).
+;  W8 TOGGLES (static until the B2 poller exists), W13 SUBSYSTEM LOAD
+;  (live bars, threshold colours from logic\), W9/10 THERMAL/POWER,
+;  W14 BATTERY/ENERGY, W16 PERFORMANCE MODE (commanded, not read back).
+;  Every HWiNFO-backed value is gated on its Idx* stub: 0 -> — (law 5).
 
 [TogFrame]
 Meter=Shape
@@ -11,6 +14,9 @@ MeterStyle=sCap
 X=(957+12)
 Y=(129-7)
 Text=TOGGLES
+
+; TODO(B2): bind squares/status to mTog* and add tap actions once the
+; state poller (sensors.ps1) exists. Static placeholders until then.
 
 [Tog1Sq]
 Meter=Shape
@@ -159,22 +165,37 @@ X=970
 Y=275
 Text=CPU
 
-[Sub1Bar]
+[Sub1Track]
 Meter=Shape
-Shape=Rectangle 1015.0,278,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape2=Rectangle 1027.86,278,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape3=Rectangle 1040.72,278,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape4=Rectangle 1053.58,278,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape5=Rectangle 1066.44,278,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape6=Rectangle 1079.3,278,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape7=Rectangle 1092.16,278,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape8=Rectangle 1105.02,278,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape9=Rectangle 1117.88,278,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape10=Rectangle 1130.74,278,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape11=Rectangle 1143.6,278,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape12=Rectangle 1156.46,278,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape13=Rectangle 1169.32,278,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape14=Rectangle 1182.18,278,10.86,11 | FillColor #Faint# | StrokeWidth 0
+Shape=Rectangle 1015,278,178,11 | FillColor #Faint# | StrokeWidth 0
+
+[Sub1Bar]
+Meter=Bar
+MeasureName=mCPULoad
+BarOrientation=Horizontal
+X=1015
+Y=278
+W=178
+H=11
+BarColor=#BarColCPU#
+SolidColor=0,0,0,1
+DynamicVariables=1
+
+[Sub1Sep]
+Meter=Shape
+Shape=Rectangle 1025.86,278,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape2=Rectangle 1038.72,278,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape3=Rectangle 1051.58,278,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape4=Rectangle 1064.44,278,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape5=Rectangle 1077.3,278,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape6=Rectangle 1090.16,278,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape7=Rectangle 1103.02,278,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape8=Rectangle 1115.88,278,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape9=Rectangle 1128.74,278,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape10=Rectangle 1141.6,278,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape11=Rectangle 1154.46,278,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape12=Rectangle 1167.32,278,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape13=Rectangle 1180.18,278,2,11 | FillColor #Bg# | StrokeWidth 0
 
 [Sub1Pct]
 Meter=String
@@ -184,7 +205,8 @@ FontSize=7.5
 StringAlign=RIGHT
 X=1240
 Y=275
-Text=36%
+DynamicVariables=1
+Text=[mCPULoad:0]%
 
 [Sub2Lbl]
 Meter=String
@@ -194,22 +216,38 @@ X=970
 Y=291
 Text=IGPU
 
-[Sub2Bar]
+[Sub2Track]
 Meter=Shape
-Shape=Rectangle 1015.0,294,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape2=Rectangle 1027.86,294,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape3=Rectangle 1040.72,294,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape4=Rectangle 1053.58,294,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape5=Rectangle 1066.44,294,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape6=Rectangle 1079.3,294,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape7=Rectangle 1092.16,294,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape8=Rectangle 1105.02,294,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape9=Rectangle 1117.88,294,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape10=Rectangle 1130.74,294,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape11=Rectangle 1143.6,294,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape12=Rectangle 1156.46,294,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape13=Rectangle 1169.32,294,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape14=Rectangle 1182.18,294,10.86,11 | FillColor #Faint# | StrokeWidth 0
+Shape=Rectangle 1015,294,178,11 | FillColor #Faint# | StrokeWidth 0
+
+[Sub2Bar]
+Meter=Bar
+MeasureName=mIGPULoad
+BarOrientation=Horizontal
+X=1015
+Y=294
+W=178
+H=11
+BarColor=#BarColIGPU#
+SolidColor=0,0,0,1
+DynamicVariables=1
+Hidden=(#IdxIGPULoad#=0)
+
+[Sub2Sep]
+Meter=Shape
+Shape=Rectangle 1025.86,294,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape2=Rectangle 1038.72,294,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape3=Rectangle 1051.58,294,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape4=Rectangle 1064.44,294,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape5=Rectangle 1077.3,294,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape6=Rectangle 1090.16,294,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape7=Rectangle 1103.02,294,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape8=Rectangle 1115.88,294,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape9=Rectangle 1128.74,294,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape10=Rectangle 1141.6,294,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape11=Rectangle 1154.46,294,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape12=Rectangle 1167.32,294,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape13=Rectangle 1180.18,294,2,11 | FillColor #Bg# | StrokeWidth 0
 
 [Sub2Pct]
 Meter=String
@@ -219,7 +257,21 @@ FontSize=7.5
 StringAlign=RIGHT
 X=1240
 Y=291
-Text=7%
+DynamicVariables=1
+Hidden=(#IdxIGPULoad#=0)
+Text=[mIGPULoad:0]%
+
+[Sub2Dash]
+Meter=String
+MeterStyle=sBody
+FontColor=#Dim#
+FontSize=7.5
+StringAlign=RIGHT
+X=1240
+Y=291
+DynamicVariables=1
+Hidden=(#IdxIGPULoad#<>0)
+Text=—
 
 [Sub3Lbl]
 Meter=String
@@ -229,22 +281,37 @@ X=970
 Y=307
 Text=RAM
 
-[Sub3Bar]
+[Sub3Track]
 Meter=Shape
-Shape=Rectangle 1015.0,310,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape2=Rectangle 1027.86,310,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape3=Rectangle 1040.72,310,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape4=Rectangle 1053.58,310,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape5=Rectangle 1066.44,310,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape6=Rectangle 1079.3,310,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape7=Rectangle 1092.16,310,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape8=Rectangle 1105.02,310,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape9=Rectangle 1117.88,310,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape10=Rectangle 1130.74,310,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape11=Rectangle 1143.6,310,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape12=Rectangle 1156.46,310,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape13=Rectangle 1169.32,310,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape14=Rectangle 1182.18,310,10.86,11 | FillColor #Faint# | StrokeWidth 0
+Shape=Rectangle 1015,310,178,11 | FillColor #Faint# | StrokeWidth 0
+
+[Sub3Bar]
+Meter=Bar
+MeasureName=mRAMLoad
+BarOrientation=Horizontal
+X=1015
+Y=310
+W=178
+H=11
+BarColor=#BarColRAM#
+SolidColor=0,0,0,1
+DynamicVariables=1
+
+[Sub3Sep]
+Meter=Shape
+Shape=Rectangle 1025.86,310,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape2=Rectangle 1038.72,310,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape3=Rectangle 1051.58,310,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape4=Rectangle 1064.44,310,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape5=Rectangle 1077.3,310,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape6=Rectangle 1090.16,310,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape7=Rectangle 1103.02,310,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape8=Rectangle 1115.88,310,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape9=Rectangle 1128.74,310,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape10=Rectangle 1141.6,310,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape11=Rectangle 1154.46,310,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape12=Rectangle 1167.32,310,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape13=Rectangle 1180.18,310,2,11 | FillColor #Bg# | StrokeWidth 0
 
 [Sub3Pct]
 Meter=String
@@ -254,7 +321,8 @@ FontSize=7.5
 StringAlign=RIGHT
 X=1240
 Y=307
-Text=55%
+DynamicVariables=1
+Text=[mRAMLoad:0]%
 
 [Sub4Lbl]
 Meter=String
@@ -264,22 +332,38 @@ X=970
 Y=323
 Text=VRAM
 
-[Sub4Bar]
+[Sub4Track]
 Meter=Shape
-Shape=Rectangle 1015.0,326,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape2=Rectangle 1027.86,326,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape3=Rectangle 1040.72,326,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape4=Rectangle 1053.58,326,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape5=Rectangle 1066.44,326,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape6=Rectangle 1079.3,326,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape7=Rectangle 1092.16,326,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape8=Rectangle 1105.02,326,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape9=Rectangle 1117.88,326,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape10=Rectangle 1130.74,326,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape11=Rectangle 1143.6,326,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape12=Rectangle 1156.46,326,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape13=Rectangle 1169.32,326,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape14=Rectangle 1182.18,326,10.86,11 | FillColor #Faint# | StrokeWidth 0
+Shape=Rectangle 1015,326,178,11 | FillColor #Faint# | StrokeWidth 0
+
+[Sub4Bar]
+Meter=Bar
+MeasureName=mVRAMPct
+BarOrientation=Horizontal
+X=1015
+Y=326
+W=178
+H=11
+BarColor=#BarColVRAM#
+SolidColor=0,0,0,1
+DynamicVariables=1
+Hidden=((#IdxVRAMDed# * #VRAMTotalMB#)=0)
+
+[Sub4Sep]
+Meter=Shape
+Shape=Rectangle 1025.86,326,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape2=Rectangle 1038.72,326,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape3=Rectangle 1051.58,326,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape4=Rectangle 1064.44,326,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape5=Rectangle 1077.3,326,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape6=Rectangle 1090.16,326,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape7=Rectangle 1103.02,326,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape8=Rectangle 1115.88,326,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape9=Rectangle 1128.74,326,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape10=Rectangle 1141.6,326,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape11=Rectangle 1154.46,326,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape12=Rectangle 1167.32,326,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape13=Rectangle 1180.18,326,2,11 | FillColor #Bg# | StrokeWidth 0
 
 [Sub4Pct]
 Meter=String
@@ -289,7 +373,21 @@ FontSize=7.5
 StringAlign=RIGHT
 X=1240
 Y=323
-Text=28%
+DynamicVariables=1
+Hidden=((#IdxVRAMDed# * #VRAMTotalMB#)=0)
+Text=[mVRAMPct:0]%
+
+[Sub4Dash]
+Meter=String
+MeterStyle=sBody
+FontColor=#Dim#
+FontSize=7.5
+StringAlign=RIGHT
+X=1240
+Y=323
+DynamicVariables=1
+Hidden=((#IdxVRAMDed# * #VRAMTotalMB#)<>0)
+Text=—
 
 [Sub5Lbl]
 Meter=String
@@ -299,22 +397,37 @@ X=970
 Y=339
 Text=DISK
 
-[Sub5Bar]
+[Sub5Track]
 Meter=Shape
-Shape=Rectangle 1015.0,342,10.86,11 | FillColor #Ok# | StrokeWidth 0
-Shape2=Rectangle 1027.86,342,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape3=Rectangle 1040.72,342,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape4=Rectangle 1053.58,342,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape5=Rectangle 1066.44,342,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape6=Rectangle 1079.3,342,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape7=Rectangle 1092.16,342,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape8=Rectangle 1105.02,342,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape9=Rectangle 1117.88,342,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape10=Rectangle 1130.74,342,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape11=Rectangle 1143.6,342,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape12=Rectangle 1156.46,342,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape13=Rectangle 1169.32,342,10.86,11 | FillColor #Faint# | StrokeWidth 0
-Shape14=Rectangle 1182.18,342,10.86,11 | FillColor #Faint# | StrokeWidth 0
+Shape=Rectangle 1015,342,178,11 | FillColor #Faint# | StrokeWidth 0
+
+[Sub5Bar]
+Meter=Bar
+MeasureName=mDiskLoad
+BarOrientation=Horizontal
+X=1015
+Y=342
+W=178
+H=11
+BarColor=#BarColDISK#
+SolidColor=0,0,0,1
+DynamicVariables=1
+
+[Sub5Sep]
+Meter=Shape
+Shape=Rectangle 1025.86,342,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape2=Rectangle 1038.72,342,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape3=Rectangle 1051.58,342,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape4=Rectangle 1064.44,342,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape5=Rectangle 1077.3,342,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape6=Rectangle 1090.16,342,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape7=Rectangle 1103.02,342,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape8=Rectangle 1115.88,342,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape9=Rectangle 1128.74,342,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape10=Rectangle 1141.6,342,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape11=Rectangle 1154.46,342,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape12=Rectangle 1167.32,342,2,11 | FillColor #Bg# | StrokeWidth 0
+Shape13=Rectangle 1180.18,342,2,11 | FillColor #Bg# | StrokeWidth 0
 
 [Sub5Pct]
 Meter=String
@@ -324,7 +437,8 @@ FontSize=7.5
 StringAlign=RIGHT
 X=1240
 Y=339
-Text=9%
+DynamicVariables=1
+Text=[mDiskLoad:0]%
 
 [Thm]
 Meter=Shape
@@ -342,15 +456,28 @@ X=1103
 Y=376
 Text=THERMAL / POWER
 
-[Thm0V]
+[ThmCpuV]
 Meter=String
 MeterStyle=sValBig
 StringAlign=CENTER
 X=1030
 Y=392
-Text=61°C
+DynamicVariables=1
+Hidden=(#IdxCPUTemp#=0)
+Text=[mCPUTemp:0]°C
 
-[Thm0S]
+[ThmCpuD]
+Meter=String
+MeterStyle=sValBig
+FontColor=#Dim#
+StringAlign=CENTER
+X=1030
+Y=392
+DynamicVariables=1
+Hidden=(#IdxCPUTemp#<>0)
+Text=—
+
+[ThmCpuS]
 Meter=String
 MeterStyle=sSub
 StringAlign=CENTER
@@ -358,15 +485,28 @@ X=1030
 Y=419
 Text=CPU TCTL
 
-[Thm1V]
+[ThmGpuV]
 Meter=String
 MeterStyle=sValBig
 StringAlign=CENTER
 X=1176
 Y=392
-Text=54°C
+DynamicVariables=1
+Hidden=(#IdxIGPUTemp#=0)
+Text=[mIGPUTemp:0]°C
 
-[Thm1S]
+[ThmGpuD]
+Meter=String
+MeterStyle=sValBig
+FontColor=#Dim#
+StringAlign=CENTER
+X=1176
+Y=392
+DynamicVariables=1
+Hidden=(#IdxIGPUTemp#<>0)
+Text=—
+
+[ThmGpuS]
 Meter=String
 MeterStyle=sSub
 StringAlign=CENTER
@@ -374,15 +514,28 @@ X=1176
 Y=419
 Text=IGPU
 
-[Thm2V]
+[ThmPkgV]
 Meter=String
 MeterStyle=sValBig
 StringAlign=CENTER
 X=1030
 Y=430
-Text=41.0 W
+DynamicVariables=1
+Hidden=(#IdxPkgPower#=0)
+Text=[mPkgPower:1] W
 
-[Thm2S]
+[ThmPkgD]
+Meter=String
+MeterStyle=sValBig
+FontColor=#Dim#
+StringAlign=CENTER
+X=1030
+Y=430
+DynamicVariables=1
+Hidden=(#IdxPkgPower#<>0)
+Text=—
+
+[ThmPkgS]
 Meter=String
 MeterStyle=sSub
 StringAlign=CENTER
@@ -390,21 +543,47 @@ X=1030
 Y=457
 Text=PACKAGE
 
-[Thm3V]
+[ThmBatV]
 Meter=String
 MeterStyle=sValBig
 StringAlign=CENTER
 X=1176
 Y=430
-Text=-18.2 W
+DynamicVariables=1
+Hidden=((#IdxBattRate#=0) || ([&mBattRate] < 0))
+Text=[mBattRate:1] W
 
-[Thm3S]
+[ThmBatVNeg]
+Meter=String
+MeterStyle=sValBig
+FontColor=#Err#
+StringAlign=CENTER
+X=1176
+Y=430
+DynamicVariables=1
+Hidden=((#IdxBattRate#=0) || ([&mBattRate] >= 0))
+Text=[mBattRate:1] W
+
+[ThmBatD]
+Meter=String
+MeterStyle=sValBig
+FontColor=#Dim#
+StringAlign=CENTER
+X=1176
+Y=430
+DynamicVariables=1
+Hidden=(#IdxBattRate#<>0)
+Text=—
+
+[ThmBatS]
 Meter=String
 MeterStyle=sSub
 StringAlign=CENTER
 X=1176
 Y=457
 Text=BATTERY
+
+; src line per law 3 — show the mechanism
 
 [Bat]
 Meter=Shape
@@ -425,6 +604,7 @@ Text=BATTERY / ENERGY
 [BatRst]
 Meter=Shape
 Shape=Rectangle 1210,479,34,16,2 | StrokeWidth 1 | Stroke Color #InkOnFill# | FillColor 0,0,0,1
+LeftMouseUpAction=[!SetOption mEnergyWh Formula "0"][!UpdateMeasure mEnergyWh][!SetOption mEnergyWh Formula "mEnergyWh + (abs(mBattRate) / 3600)"][!CommandMeasure mLog "Add('OK','energy counter reset')"]
 
 [BatRstT]
 Meter=String
@@ -436,15 +616,28 @@ X=1227
 Y=481
 Text=RST
 
-[Bat0V]
+[BatLeftV]
 Meter=String
 MeterStyle=sVal
 StringAlign=CENTER
 X=1006
 Y=502
-Text=3:42
+DynamicVariables=1
+Hidden=(#IdxBattLeft#=0)
+Text=[mBattLeft:0] MIN
 
-[Bat0S]
+[BatLeftD]
+Meter=String
+MeterStyle=sVal
+FontColor=#Dim#
+StringAlign=CENTER
+X=1006
+Y=502
+DynamicVariables=1
+Hidden=(#IdxBattLeft#<>0)
+Text=—
+
+[BatLeftS]
 Meter=String
 MeterStyle=sSub
 StringAlign=CENTER
@@ -452,15 +645,28 @@ X=1006
 Y=525
 Text=LEFT
 
-[Bat1V]
+[BatChgV]
 Meter=String
 MeterStyle=sVal
 StringAlign=CENTER
 X=1103
 Y=502
-Text=68%
+DynamicVariables=1
+Hidden=(#IdxBattPct#=0)
+Text=[mBattPct:0]%
 
-[Bat1S]
+[BatChgD]
+Meter=String
+MeterStyle=sVal
+FontColor=#Dim#
+StringAlign=CENTER
+X=1103
+Y=502
+DynamicVariables=1
+Hidden=(#IdxBattPct#<>0)
+Text=—
+
+[BatChgS]
 Meter=String
 MeterStyle=sSub
 StringAlign=CENTER
@@ -468,15 +674,28 @@ X=1103
 Y=525
 Text=CHARGE
 
-[Bat2V]
+[BatWhV]
 Meter=String
 MeterStyle=sVal
 StringAlign=CENTER
 X=1200
 Y=502
-Text=14.6
+DynamicVariables=1
+Hidden=(#IdxBattRate#=0)
+Text=[mEnergyWh:1]
 
-[Bat2S]
+[BatWhD]
+Meter=String
+MeterStyle=sVal
+FontColor=#Dim#
+StringAlign=CENTER
+X=1200
+Y=502
+DynamicVariables=1
+Hidden=(#IdxBattRate#<>0)
+Text=—
+
+[BatWhS]
 Meter=String
 MeterStyle=sSub
 StringAlign=CENTER
@@ -500,11 +719,43 @@ X=1103
 Y=559
 Text=PERFORMANCE MODE
 
+; △ — driven by AHK hotkeys once wired (unofficial mechanism, law 4)
+
+[PrfFrag]
+Meter=String
+MeterStyle=sBody
+FontColor=#InkOnFill#
+FontSize=8.25
+X=1240
+Y=552
+Text=△
+
+[Prf1Fill]
+Meter=Shape
+Shape=Rectangle 959,571,91,32 | FillColor #Key# | StrokeWidth 0
+DynamicVariables=1
+Hidden=(#PerfMode#<>0)
+LeftMouseUpAction=[!SetVariable PerfMode 0][!WriteKeyValue Variables PerfMode 0 "#@#Variables.inc"][!CommandMeasure mLog "Add('WARN','perf mode SILENT commanded — not read back (AHK hookup pending)')"][!UpdateMeter *][!Redraw]
+
 [Prf1Box]
 Meter=Shape
 Shape=Rectangle 959,571,91,32,2 | StrokeWidth 1 | Stroke Color #Frame# | FillColor 0,0,0,1
+DynamicVariables=1
+Hidden=(#PerfMode#=0)
+LeftMouseUpAction=[!SetVariable PerfMode 0][!WriteKeyValue Variables PerfMode 0 "#@#Variables.inc"][!CommandMeasure mLog "Add('WARN','perf mode SILENT commanded — not read back (AHK hookup pending)')"][!UpdateMeter *][!Redraw]
 
-[Prf1Name]
+[Prf1NameOn]
+Meter=String
+MeterStyle=sInk
+FontSize=9
+StringAlign=CENTER
+X=1004
+Y=576
+DynamicVariables=1
+Hidden=(#PerfMode#<>0)
+Text=SILENT
+
+[Prf1NameOff]
 Meter=String
 MeterStyle=sBtn
 FontColor=#Fg#
@@ -512,45 +763,117 @@ FontSize=9
 StringAlign=CENTER
 X=1004
 Y=576
+DynamicVariables=1
+Hidden=(#PerfMode#=0)
 Text=SILENT
 
-[Prf1W]
+[Prf1WOn]
+Meter=String
+MeterStyle=sSub
+FontColor=#InkOnFill#
+StringAlign=CENTER
+X=1004
+Y=592
+DynamicVariables=1
+Hidden=(#PerfMode#<>0)
+Text=15 W
+
+[Prf1WOff]
 Meter=String
 MeterStyle=sSub
 FontColor=#Dim#
 StringAlign=CENTER
 X=1004
 Y=592
+DynamicVariables=1
+Hidden=(#PerfMode#=0)
 Text=15 W
 
 [Prf2Fill]
 Meter=Shape
 Shape=Rectangle 1056,571,91,32 | FillColor #Key# | StrokeWidth 0
+DynamicVariables=1
+Hidden=(#PerfMode#<>1)
+LeftMouseUpAction=[!SetVariable PerfMode 1][!WriteKeyValue Variables PerfMode 1 "#@#Variables.inc"][!CommandMeasure mLog "Add('WARN','perf mode BALANCED commanded — not read back (AHK hookup pending)')"][!UpdateMeter *][!Redraw]
 
-[Prf2Name]
+[Prf2Box]
+Meter=Shape
+Shape=Rectangle 1056,571,91,32,2 | StrokeWidth 1 | Stroke Color #Frame# | FillColor 0,0,0,1
+DynamicVariables=1
+Hidden=(#PerfMode#=1)
+LeftMouseUpAction=[!SetVariable PerfMode 1][!WriteKeyValue Variables PerfMode 1 "#@#Variables.inc"][!CommandMeasure mLog "Add('WARN','perf mode BALANCED commanded — not read back (AHK hookup pending)')"][!UpdateMeter *][!Redraw]
+
+[Prf2NameOn]
 Meter=String
 MeterStyle=sInk
-FontColor=#InkOnFill#
 FontSize=9
 StringAlign=CENTER
 X=1101
 Y=576
+DynamicVariables=1
+Hidden=(#PerfMode#<>1)
 Text=BALANCED
 
-[Prf2W]
+[Prf2NameOff]
+Meter=String
+MeterStyle=sBtn
+FontColor=#Fg#
+FontSize=9
+StringAlign=CENTER
+X=1101
+Y=576
+DynamicVariables=1
+Hidden=(#PerfMode#=1)
+Text=BALANCED
+
+[Prf2WOn]
 Meter=String
 MeterStyle=sSub
 FontColor=#InkOnFill#
 StringAlign=CENTER
 X=1101
 Y=592
+DynamicVariables=1
+Hidden=(#PerfMode#<>1)
 Text=45 W
+
+[Prf2WOff]
+Meter=String
+MeterStyle=sSub
+FontColor=#Dim#
+StringAlign=CENTER
+X=1101
+Y=592
+DynamicVariables=1
+Hidden=(#PerfMode#=1)
+Text=45 W
+
+[Prf3Fill]
+Meter=Shape
+Shape=Rectangle 1153,571,91,32 | FillColor #Key# | StrokeWidth 0
+DynamicVariables=1
+Hidden=(#PerfMode#<>2)
+LeftMouseUpAction=[!SetVariable PerfMode 2][!WriteKeyValue Variables PerfMode 2 "#@#Variables.inc"][!CommandMeasure mLog "Add('WARN','perf mode TURBO commanded — not read back (AHK hookup pending)')"][!UpdateMeter *][!Redraw]
 
 [Prf3Box]
 Meter=Shape
 Shape=Rectangle 1153,571,91,32,2 | StrokeWidth 1 | Stroke Color #Frame# | FillColor 0,0,0,1
+DynamicVariables=1
+Hidden=(#PerfMode#=2)
+LeftMouseUpAction=[!SetVariable PerfMode 2][!WriteKeyValue Variables PerfMode 2 "#@#Variables.inc"][!CommandMeasure mLog "Add('WARN','perf mode TURBO commanded — not read back (AHK hookup pending)')"][!UpdateMeter *][!Redraw]
 
-[Prf3Name]
+[Prf3NameOn]
+Meter=String
+MeterStyle=sInk
+FontSize=9
+StringAlign=CENTER
+X=1198
+Y=576
+DynamicVariables=1
+Hidden=(#PerfMode#<>2)
+Text=TURBO
+
+[Prf3NameOff]
 Meter=String
 MeterStyle=sBtn
 FontColor=#Fg#
@@ -558,13 +881,28 @@ FontSize=9
 StringAlign=CENTER
 X=1198
 Y=576
+DynamicVariables=1
+Hidden=(#PerfMode#=2)
 Text=TURBO
 
-[Prf3W]
+[Prf3WOn]
+Meter=String
+MeterStyle=sSub
+FontColor=#InkOnFill#
+StringAlign=CENTER
+X=1198
+Y=592
+DynamicVariables=1
+Hidden=(#PerfMode#<>2)
+Text=80 W
+
+[Prf3WOff]
 Meter=String
 MeterStyle=sSub
 FontColor=#Dim#
 StringAlign=CENTER
 X=1198
 Y=592
+DynamicVariables=1
+Hidden=(#PerfMode#=2)
 Text=80 W

@@ -1,4 +1,7 @@
 [Variables]
+; PHOSPHOR cycle: FUNCTIONS rewrites @IncludeTheme to NextTheme in all skins
+ThemeSlug=hc-green
+NextTheme=hc-cyan
 ; HC GREEN — P1-phosphor green on pure black. DERIVED from the HC AMBER
 ; role structure (design system lists HC GREEN at WCAG 7.1); confirm on device.
 ThemeName=HC GREEN

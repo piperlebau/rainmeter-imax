@@ -1,4 +1,7 @@
 [Variables]
+; PHOSPHOR cycle: FUNCTIONS rewrites @IncludeTheme to NextTheme in all skins
+ThemeSlug=mono-white
+NextTheme=night-red
 ; MONO WHITE — no hue at all; severity by brightness only.
 ; Highest measured contrast (WCAG 11.5, AAA). Most robust to blur.
 ThemeName=MONO WHITE

@@ -69,7 +69,8 @@ FontSizeBrand=17.25
 
 ; ---- DPI ----
 ; Physical px per logical px on the device (Z13: 2560x1600 at 200% = 2).
-; Used by the child skins to !Move themselves into their reserved holes.
+; NOT needed for !Move (it uses the DPI-scaled skin space — verified on device);
+; kept for any future physical-px math.
 DpiScale=2
 
 ; ---- child-skin hole positions (derived; keep in sync with pipOS.ini frames) ----
@@ -97,6 +98,23 @@ DriftFlag=0          ; set by logic\sensors.inc label check
 LogLast=             ; newest log line, set by Scripts\log.lua
 LogSeq=0
 PerfMode=1           ; 0 silent 1 balanced 2 turbo (commanded, not read back)
+PaneIsEditor=0       ; set by logic\workspace.inc from WSMode
+
+; ---- runtime colour caches (overwritten every update by logic\; the
+;      defaults only matter for the first frame before measures fire) ----
+SevColor=59,255,106
+BarColCPU=127,88,0
+BarColRAM=127,88,0
+BarColDISK=127,88,0
+BarColIGPU=127,88,0
+BarColVRAM=127,88,0
+
+; workspace display names (modeline, banner, rail)
+WSName1=DEV
+WSName2=MEDIA
+WSName3=GAME
+WSName4=WRITE
+WSName5=DIAG
 
 Workspace=1          ; active workspace id 1..5
 WSMode=apps          ; apps | editor  (WS4 = editor)
@@ -119,6 +137,10 @@ IdxBattLeft=0        ; TODO: discover on device — Estimated Remaining Time
 IdxBattPct=0         ; TODO: discover on device — Charge Level
 IdxFanCPU=0          ; TODO: discover on device — may be absent (EC contention, §5.4)
 IdxFanGPU=0          ; TODO: discover on device — may be absent
+
+; Total VRAM allocation in MB for the W13 VRAM bar denominator.
+; 0 = unknown -> the bar hides and the value shows — (law 5).
+VRAMTotalMB=0        ; TODO: discover on device (unified-memory split is configurable)
 
 ; Expected label strings, for the drift check in W3 (§6.1). If Label#Idx#
 ; doesn't match these at runtime, W3 shows SENSOR MAP DRIFT.
